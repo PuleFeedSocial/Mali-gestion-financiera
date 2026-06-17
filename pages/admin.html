@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meli | Admin</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; }
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .admin-sidebar {
+            width: 240px;
+            background-color: #1f1f1d;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem 0;
+            flex-shrink: 0;
+        }
+        .admin-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; }
+        .admin-sidebar .logo span { color: var(--accent); }
+        .admin-sidebar nav a {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.7rem 1.5rem; color: var(--text-secondary);
+            text-decoration: none; font-size: 0.9rem;
+            transition: all 0.2s; border-left: 3px solid transparent;
+        }
+        .admin-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.05); }
+        .admin-sidebar nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(199,239,0,0.08); }
+        .admin-sidebar .nav-label {
+            padding: 1rem 1.5rem 0.5rem; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3); font-weight: 600;
+        }
+        .admin-sidebar nav a.sub { padding-left: 3rem; font-size: 0.85rem; }
+
+        .admin-main { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
+        .admin-main h1 { font-size: 1.6rem; letter-spacing: -0.5px; margin-bottom: 0.3rem; }
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+
+        .section-card {
+            background: #1f1f1d;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-wrap { overflow-x: auto; }
+        table.admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        table.admin-table th {
+            text-align: left;
+            padding: 0.8rem 1rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+        table.admin-table td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        table.admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+        table.admin-table .badge-role {
+            font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 4px;
+            font-weight: 600;
+        }
+        table.admin-table .badge-role.admin { background: rgba(199,239,0,0.15); color: var(--accent); }
+        table.admin-table .badge-role.user { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+        table.admin-table .badge-code {
+            font-family: monospace;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+        table.admin-table .badge-used { color: #ff6b6b; font-size: 0.75rem; }
+        table.admin-table .badge-available { color: var(--accent); font-size: 0.75rem; }
+
+        .small-btn {
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        .small-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .small-btn.danger:hover { border-color: #ff6b6b; color: #ff6b6b; }
+
+        .gen-row {
+            display: flex; gap: 0.8rem; align-items: end;
+            flex-wrap: wrap;
+        }
+        .gen-row .field { display: flex; flex-direction: column; gap: 0.3rem; }
+        .gen-row .field label { font-size: 0.75rem; color: var(--text-secondary); }
+        .gen-row input, .gen-row select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .gen-row input:focus { border-color: var(--accent); }
+
+        .msg {
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.15); border: 1px solid rgba(199,239,0,0.3); color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .admin-sidebar { display: none; }
+            .admin-main { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <div class="logo">Meli<span>.</span></div>
+        <nav>
+            <div class="nav-label">General</div>
+            <a href="dashboard.html">📊 Panel principal</a>
+            <div class="nav-label">Finanzas</div>
+            <a href="finanzas-personales.html">💰 Finanzas personales</a>
+            <div class="nav-label">Administración</div>
+            <a href="admin.html" class="active">⚙️ Panel admin</a>
+            <a href="admin.html#usuarios" class="sub">👥 Usuarios</a>
+            <a href="admin.html#codigos" class="sub">🔑 Códigos</a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-header">
+            <div>
+                <div style="color:var(--text-secondary);font-size:0.85rem;">⚙️ <span style="color:var(--accent);">Administración</span></div>
+                <h1>Panel de Administración</h1>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <span id="adminBadge" style="font-size:0.85rem;color:var(--text-secondary);">Cargando...</span>
+                <button class="btn btn-outline" id="logoutBtn" style="padding:0.4rem 1.2rem;font-size:0.8rem;">Salir</button>
+            </div>
+        </div>
+
+        <div id="adminMsg" class="msg"></div>
+
+        <div class="section-card" id="usuarios">
+            <div class="section-title">👥 Usuarios registrados</div>
+            <div class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Registro</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:2rem;">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section-card" id="codigos">
+            <div class="section-title">🔑 Códigos de activación</div>
+
+            <div class="gen-row" style="margin-bottom:1.5rem;">
+                <div class="field">
+                    <label>Cantidad</label>
+                    <input type="number" id="genCantidad" value="1" min="1" max="20" style="width:80px;">
+                </div>
+                <button class="btn btn-primary" id="genBtn" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Generar códigos</button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Estado</th>
+                            <th>Usado por</th>
+                            <th>Creado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="codesBody">
+                        <tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:2rem;">Cargando códigos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, supabase, logout } from '../script/auth.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    if (!profile || profile.role !== 'admin') {
+        window.location.href = 'dashboard.html'
+        throw new Error()
+    }
+
+    document.getElementById('adminBadge').textContent = `👤 ${profile.name}`
+
+    const msg = document.getElementById('adminMsg')
+    function showMsg(text, type) {
+        msg.textContent = text
+        msg.className = `msg ${type}`
+        setTimeout(() => { msg.className = 'msg' }, 4000)
+    }
+
+    async function cargarUsuarios() {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false })
+
+        if (error) { showMsg('Error al cargar usuarios: ' + error.message, 'error'); return }
+
+        const tbody = document.getElementById('usersBody')
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay usuarios registrados.</td></tr>'
+            return
+        }
+
+        tbody.innerHTML = data.map(u => {
+            const fecha = new Date(u.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+            return `<tr>
+                <td>${u.name}</td>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${u.email || '-'}</td>
+                <td><span class="badge-role ${u.role}">${u.role}</span></td>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${fecha}</td>
+                <td>
+                    ${u.role === 'admin'
+                        ? (profile.id !== u.id ? '<button class="small-btn" onclick="cambiarRol(\'' + u.id + '\',\'user\')">Hacer user</button>' : '<span style="font-size:0.7rem;color:var(--text-secondary);">(vos)</span>')
+                        : '<button class="small-btn" onclick="cambiarRol(\'' + u.id + '\',\'admin\')">Hacer admin</button>'
+                    }
+                </td>
+            </tr>`
+        }).join('')
+    }
+
+    window.cambiarRol = async function(userId, nuevoRol) {
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ role: nuevoRol })
+                .eq('id', userId)
+
+            if (error) throw error
+            showMsg(`Rol actualizado a ${nuevoRol}.`, 'success')
+            await cargarUsuarios()
+        } catch (e) {
+            showMsg('Error al cambiar rol: ' + e.message, 'error')
+        }
+    }
+
+    async function cargarCodigos() {
+        const { data, error } = await supabase
+            .from('activation_codes')
+            .select('*, profiles!activation_codes_used_by_fkey(name)')
+            .order('created_at', { ascending: false })
+
+        if (error) { showMsg('Error al cargar códigos: ' + error.message, 'error'); return }
+
+        const tbody = document.getElementById('codesBody')
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay códigos generados.</td></tr>'
+            return
+        }
+
+        tbody.innerHTML = data.map(c => {
+            const fecha = new Date(c.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+            const usado = c.used
+            return `<tr>
+                <td><span class="badge-code">${c.code}</span></td>
+                <td>${usado ? '<span class="badge-used">● Usado</span>' : '<span class="badge-available">● Disponible</span>'}</td>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${usado && c.profiles ? c.profiles.name : '-'}</td>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${fecha}</td>
+            </tr>`
+        }).join('')
+    }
+
+    document.getElementById('genBtn').addEventListener('click', async () => {
+        const cantidad = parseInt(document.getElementById('genCantidad').value) || 1
+        const codigos = []
+
+        for (let i = 0; i < cantidad; i++) {
+            const code = String(Math.floor(100000 + Math.random() * 900000))
+            codigos.push({ code })
+        }
+
+        try {
+            const { error } = await supabase.from('activation_codes').insert(codigos)
+            if (error) throw error
+            showMsg(`${cantidad} código(s) generado(s).`, 'success')
+            await cargarCodigos()
+        } catch (e) {
+            showMsg('Error al generar: ' + e.message, 'error')
+        }
+    })
+
+    document.getElementById('logoutBtn').addEventListener('click', () => logout())
+
+    await cargarUsuarios()
+    await cargarCodigos()
+</script>
+</body>
+</html>

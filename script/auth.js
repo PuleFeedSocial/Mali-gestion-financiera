@@ -61,7 +61,7 @@ export async function register(name, email, password, activationCode) {
 
   const { error: pe } = await supabase
     .from('profiles')
-    .insert({ id: data.user.id, name, role: 'user' })
+    .insert({ id: data.user.id, name, email, role: 'user' })
   if (pe) throw new Error('Error al crear perfil de usuario.')
 
   await supabase

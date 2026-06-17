@@ -120,6 +120,9 @@
             <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
             <a href="#" style="opacity:0.4;pointer-events:none;">📈 Inversiones</a>
 
+            <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
+            <a href="admin.html" id="adminLink" class="sub" style="display:none;">⚙️ Panel admin</a>
+
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
             <a href="#" style="opacity:0.4;pointer-events:none;">📁 Organización</a>
@@ -178,6 +181,10 @@
     const profile = await getUserProfile()
     if (profile) {
         document.getElementById('userBadge').textContent = `👤 ${profile.name}`
+        if (profile.role === 'admin') {
+            document.getElementById('adminLabel').style.display = 'block'
+            document.getElementById('adminLink').style.display = 'flex'
+        }
     }
 
     document.getElementById('logoutBtn').addEventListener('click', () => logout())
