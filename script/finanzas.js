@@ -2,8 +2,10 @@ import { supabase, getSession } from './auth.js'
 
 const META_PREFIX = '__META__'
 
-function metaEncode(total, inst, paid) {
-  return JSON.stringify({ t: total, i: inst, p: paid })
+function metaEncode(total, inst, paid, nextDate) {
+  const obj = { t: total, i: inst, p: paid }
+  if (nextDate) obj.n = nextDate
+  return JSON.stringify(obj)
 }
 
 function metaDecode(desc) {
@@ -222,7 +224,12 @@ export async function addDebt({ type, debtor, amount, description, dueDate, inst
   const installmentAmount = inst > 0 ? total / inst : total
   const isMulti = inst > 1
 
+  const nextDate = new Date()
+  nextDate.setDate(nextDate.getDate() + 30)
+  const nextDateStr = nextDate.toISOString().split('T')[0]
+
   if (await hasInstallmentsColumn()) {
+    const meta = isMulti ? META_PREFIX + JSON.stringify({ n: nextDateStr }) : ''
     const { error } = await supabase.from('debts').insert({
       user_id: session.user.id,
       type, debtor,
@@ -230,13 +237,13 @@ export async function addDebt({ type, debtor, amount, description, dueDate, inst
       total_amount: total,
       installments: inst,
       installments_paid: 0,
-      description: description || '',
+      description: (description || '') + meta,
       due_date: dueDate
     })
     if (error) throw error
   } else {
     const desc = isMulti
-      ? (description || '') + '\n' + META_PREFIX + metaEncode(total, inst, 0)
+      ? (description || '') + '\n' + META_PREFIX + metaEncode(total, inst, 0, nextDateStr)
       : (description || '')
     const { error } = await supabase.from('debts').insert({
       user_id: session.user.id,
@@ -269,15 +276,19 @@ export async function getDebts({ status, type } = {}) {
   if (!data) return []
 
   return data.map(d => {
+    const meta = metaDecode(d.description)
+
     if (hasInst) {
       return {
         ...d,
         total_amount: Number(d.total_amount) || Number(d.amount),
         installments: Number(d.installments) || 1,
-        installments_paid: Number(d.installments_paid) || 0
+        installments_paid: Number(d.installments_paid) || 0,
+        next_payment_date: meta?.n || null,
+        description: meta ? metaStrip(d.description) : (d.description || '')
       }
     }
-    const meta = metaDecode(d.description)
+
     if (meta) {
       return {
         ...d,
@@ -285,14 +296,16 @@ export async function getDebts({ status, type } = {}) {
         total_amount: meta.t,
         installments: meta.i,
         installments_paid: meta.p,
-        amount: meta.t - (meta.t / meta.i * meta.p)
+        amount: meta.t - (meta.t / meta.i * meta.p),
+        next_payment_date: meta.n || null
       }
     }
     return {
       ...d,
       total_amount: Number(d.amount),
       installments: 1,
-      installments_paid: d.status === 'pendiente' ? 0 : 1
+      installments_paid: d.status === 'pendiente' ? 0 : 1,
+      next_payment_date: null
     }
   })
 }
@@ -314,17 +327,21 @@ export async function payInstallment(id) {
 
   let totalAmt, instCount, paidCount, instAmt
   let cleanDesc = debt.description || ''
+  let oldMeta = null
 
   if (hasInst) {
     totalAmt = Number(debt.total_amount) || Number(debt.amount) * Number(debt.installments)
     instCount = Number(debt.installments) || 1
     paidCount = Number(debt.installments_paid) || 0
+    oldMeta = metaDecode(debt.description)
+    if (oldMeta) cleanDesc = metaStrip(debt.description)
   } else {
     const meta = metaDecode(debt.description)
     if (!meta) throw new Error('Esta deuda no tiene cuotas.')
     totalAmt = meta.t
     instCount = meta.i
     paidCount = meta.p
+    oldMeta = meta
     cleanDesc = metaStrip(debt.description)
   }
 
@@ -336,13 +353,21 @@ export async function payInstallment(id) {
   const newAmount = totalAmt - (instAmt * newPaid)
   const isComplete = newPaid >= instCount
 
+  const nextDate = new Date()
+  nextDate.setDate(nextDate.getDate() + 30)
+  const nextDateStr = nextDate.toISOString().split('T')[0]
+
   if (hasInst) {
+    const metaPayload = { n: nextDateStr }
+    const metaStr = META_PREFIX + JSON.stringify(metaPayload)
+    const newDesc = isComplete ? cleanDesc : cleanDesc + metaStr
     const { error: updateError } = await supabase
       .from('debts')
       .update({
         amount: Math.max(0, newAmount),
         installments_paid: newPaid,
-        status: isComplete ? (debt.type === 'por_cobrar' ? 'cobrado' : 'pagado') : 'pendiente'
+        status: isComplete ? (debt.type === 'por_cobrar' ? 'cobrado' : 'pagado') : 'pendiente',
+        description: newDesc
       })
       .eq('id', id)
       .eq('user_id', session.user.id)
@@ -350,7 +375,7 @@ export async function payInstallment(id) {
   } else {
     const newDesc = isComplete
       ? cleanDesc
-      : cleanDesc + '\n' + META_PREFIX + metaEncode(totalAmt, instCount, newPaid)
+      : cleanDesc + '\n' + META_PREFIX + metaEncode(totalAmt, instCount, newPaid, nextDateStr)
     const { error: updateError } = await supabase
       .from('debts')
       .update({
@@ -390,12 +415,12 @@ export async function updateDebtStatus(id, newStatus) {
 
   const hasInst = await hasInstallmentsColumn()
   const remaining = Number(debt.amount)
-  const cleanDesc = hasInst ? (debt.description || '') : metaStrip(debt.description || '')
+  const cleanDesc = metaStrip(debt.description || '')
 
   if (hasInst) {
     const { error: updateError } = await supabase
       .from('debts')
-      .update({ status: newStatus, amount: 0, installments_paid: debt.installments })
+      .update({ status: newStatus, amount: 0, installments_paid: debt.installments, description: cleanDesc })
       .eq('id', id)
       .eq('user_id', session.user.id)
     if (updateError) throw updateError

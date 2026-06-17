@@ -251,7 +251,7 @@
                     <input type="text" id="fDesc" placeholder="Ej: Préstamo, compra...">
                 </div>
                 <div class="field">
-                    <label>Fecha de vencimiento</label>
+                    <label>Fecha de finalización</label>
                     <input type="date" id="fFecha">
                 </div>
                 <div class="field">
@@ -276,7 +276,9 @@
                 <table class="d-table">
                     <thead>
                         <tr>
-                            <th>Vence</th>
+                            <th>Ingreso</th>
+                            <th>Finaliza</th>
+                            <th>Próx. cobro</th>
                             <th>Tipo</th>
                             <th>Persona</th>
                             <th>Concepto</th>
@@ -288,7 +290,7 @@
                         </tr>
                     </thead>
                     <tbody id="deudasBody">
-<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>
+<tr><td colspan="11" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -360,11 +362,18 @@
     function renderDeudas(deudas) {
         const tbody = document.getElementById('deudasBody')
         if (!deudas.length) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>'
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>'
             return
         }
         tbody.innerHTML = deudas.map(d => {
-            const vence = new Date(d.due_date + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+            const fmtDate = (str) => {
+                if (!str) return '-'
+                const p = str.split('-')
+                return `${p[2]}/${p[1]}/${p[0]}`
+            }
+            const vence = d.due_date ? fmtDate(d.due_date) : '-'
+            const ingreso = d.created_at ? fmtDate(d.created_at.split('T')[0]) : '-'
+            const proxCobro = d.next_payment_date ? fmtDate(d.next_payment_date) : (d.status === 'pendiente' && d.installments > 1 ? vence : '-')
             const cls = d.type === 'por_cobrar' ? 'cobrar' : 'pagar'
             const signo = d.type === 'por_cobrar' ? '+' : '-'
             const estadoCls = d.vencida ? 'vencida' : d.status
@@ -373,16 +382,18 @@
             const totalAmt = Number(d.total_amount) || Number(d.amount)
             const inst = Number(d.installments) || 1
             const paid = Number(d.installments_paid) || 0
-            const remaining = Number(d.amount)
 
             let acciones = ''
             if (d.status === 'pendiente' && paid < inst) {
                 acciones = `<button class="small-btn primary-hover" onclick="pagarCuota(${d.id})">${d.type === 'por_cobrar' ? 'Cobrar' : 'Pagar'} cuota</button>`
                 if (paid === 0) acciones += `<button class="small-btn danger-hover" onclick="cancelar(${d.id})">Cancelar</button>`
             }
+            acciones += `<button class="small-btn danger-hover" onclick="eliminar(${d.id})" title="Eliminar" style="margin-left:0.4rem;">✕</button>`
 
             return `<tr>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${ingreso}</td>
                 <td style="color:${d.vencida ? '#ff6b6b' : 'var(--text-secondary)'};font-size:0.85rem;">${vence}</td>
+                <td style="color:var(--text-muted);font-size:0.8rem;">${proxCobro}</td>
                 <td>${d.type === 'por_cobrar' ? '💰 Cobrar' : '💸 Pagar'}</td>
                 <td>${d.debtor}</td>
                 <td style="color:var(--text-secondary);font-size:0.8rem;">${d.description || '-'}</td>
@@ -415,6 +426,15 @@
         try {
             await updateDebtStatus(id, 'cancelado')
             showMsg('Deuda cancelada.', 'success')
+            await Promise.all([cargarResumen(), cargarDeudas()])
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    }
+
+    window.eliminar = async function(id) {
+        if (!confirm('¿Eliminar esta deuda permanentemente?')) return
+        try {
+            await deleteDebt(id)
+            showMsg('Deuda eliminada.', 'success')
             await Promise.all([cargarResumen(), cargarDeudas()])
         } catch (e) { showMsg('Error: ' + e.message, 'error') }
     }
