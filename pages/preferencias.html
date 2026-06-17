@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meli | Preferencias</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; background: var(--bg-color); }
+        .pref-wrapper { max-width: 600px; margin: 0 auto; padding: 3rem 2rem; }
+        .pref-wrapper .back {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;
+            margin-bottom: 2rem; transition: color 0.2s;
+        }
+        .pref-wrapper .back:hover { color: var(--accent); }
+        .pref-wrapper h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .pref-wrapper .sub { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; }
+        .card-pref {
+            background: #1f1f1d;
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .card-pref h3 { font-size: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card-pref .field { margin-bottom: 1.2rem; }
+        .card-pref .field label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; font-weight: 500; }
+        .card-pref select, .card-pref input, .card-pref textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .card-pref select:focus, .card-pref input:focus { border-color: var(--accent); }
+        .card-pref select option { background: #1f1f1d; color: white; }
+        .msg {
+            padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; display: none;
+        }
+        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.15); border: 1px solid rgba(199,239,0,0.3); color: var(--accent); }
+    </style>
+</head>
+<body>
+<div class="pref-wrapper">
+    <a href="dashboard.html" class="back">← Volver al Dashboard</a>
+    <h1>🎨 Preferencias</h1>
+    <p class="sub">Personalizá Meli a tu gusto.</p>
+
+    <div id="prefMsg" class="msg"></div>
+
+    <div class="card-pref">
+        <h3>💰 Moneda principal</h3>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">Todos los montos se mostrarán en esta moneda.</p>
+        <div class="field">
+            <select id="currency">
+                <option value="USD">USD - Dólar estadounidense</option>
+                <option value="ARS">ARS - Peso argentino</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="BRL">BRL - Real brasileño</option>
+                <option value="CLP">CLP - Peso chileno</option>
+                <option value="COP">COP - Peso colombiano</option>
+                <option value="MXN">MXN - Peso mexicano</option>
+                <option value="PEN">PEN - Sol peruano</option>
+                <option value="UYU">UYU - Peso uruguayo</option>
+                <option value="BOB">BOB - Boliviano</option>
+                <option value="PYG">PYG - Guaraní paraguayo</option>
+                <option value="GBP">GBP - Libra esterlina</option>
+                <option value="CAD">CAD - Dólar canadiense</option>
+                <option value="JPY">JPY - Yen japonés</option>
+                <option value="CNY">CNY - Yuan chino</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" id="savePrefBtn" style="padding:0.6rem 1.5rem;font-size:0.9rem;">Guardar preferencias</button>
+    </div>
+
+    <div class="card-pref">
+        <h3>🎯 Mis objetivos</h3>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">¿Para qué estás usando Meli?</p>
+        <div class="field">
+            <textarea id="goals" rows="3" placeholder="Ej: controlar gastos, ahorrar, organizar proyectos..." style="resize:vertical;"></textarea>
+        </div>
+        <button class="btn btn-primary" id="saveGoalsBtn" style="padding:0.6rem 1.5rem;font-size:0.9rem;">Guardar objetivos</button>
+    </div>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, updateProfile } from '../script/auth.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    if (profile) {
+        document.getElementById('currency').value = profile.currency || 'USD'
+        document.getElementById('goals').value = profile.goals || ''
+    }
+
+    const msg = document.getElementById('prefMsg')
+
+    document.getElementById('savePrefBtn').addEventListener('click', async function () {
+        const currency = document.getElementById('currency').value
+        this.disabled = true; this.textContent = 'Guardando...'
+        try { await updateProfile({ currency }); msg.className = 'msg success'; msg.textContent = 'Moneda actualizada a ' + currency + '.'; setTimeout(() => { msg.className = 'msg' }, 3000); this.disabled = false; this.textContent = 'Guardar preferencias' }
+        catch (e) { msg.className = 'msg error'; msg.textContent = 'Error: ' + e.message; this.disabled = false; this.textContent = 'Guardar preferencias' }
+    })
+
+    document.getElementById('saveGoalsBtn').addEventListener('click', async function () {
+        const goals = document.getElementById('goals').value.trim()
+        this.disabled = true; this.textContent = 'Guardando...'
+        try { await updateProfile({ goals }); msg.className = 'msg success'; msg.textContent = 'Objetivos guardados.'; setTimeout(() => { msg.className = 'msg' }, 3000); this.disabled = false; this.textContent = 'Guardar objetivos' }
+        catch (e) { msg.className = 'msg error'; msg.textContent = 'Error: ' + e.message; this.disabled = false; this.textContent = 'Guardar objetivos' }
+    })
+</script>
+</body>
+</html>

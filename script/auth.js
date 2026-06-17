@@ -88,4 +88,38 @@ export async function getUserProfile() {
   return data
 }
 
+export async function completeSetup(currency, goals) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+  const { error } = await supabase
+    .from('profiles')
+    .update({ currency, goals, setup_complete: true })
+    .eq('id', session.user.id)
+  if (error) throw error
+}
+
+export async function updatePassword(currentPassword, newPassword) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: session.user.email,
+    password: currentPassword
+  })
+  if (signInError) throw new Error('La contraseña actual no es correcta.')
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  if (error) throw error
+}
+
+export async function updateProfile(data) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+  const { error } = await supabase
+    .from('profiles')
+    .update(data)
+    .eq('id', session.user.id)
+  if (error) throw error
+}
+
 export { supabase }

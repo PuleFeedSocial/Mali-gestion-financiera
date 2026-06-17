@@ -134,7 +134,7 @@
 
             try {
                 await register(name, email, password, code)
-                window.location.href = 'dashboard.html'
+                window.location.href = 'setup.html'
             } catch (err) {
                 showError('registerError', err.message || 'Error al registrarse.')
                 setLoading('registerBtn', false)

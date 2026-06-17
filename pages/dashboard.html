@@ -101,6 +101,38 @@
         .welcome-card .status.active { color: var(--accent); }
         .welcome-card .status.inactive { color: rgba(255,255,255,0.3); }
 
+        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .user-dropdown .avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--accent); color: var(--bg-color);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem;
+        }
+        .user-dropdown .name { font-size: 0.85rem; font-weight: 500; }
+        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; }
+        .user-dropdown.open .arrow { transform: rotate(180deg); }
+        .user-dropdown-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            background: #1f1f1d; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 0.5rem;
+            min-width: 200px; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+        .user-dropdown.open .user-dropdown-menu { display: block; }
+        .user-dropdown-menu a {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.6rem 0.8rem; color: var(--text-secondary);
+            text-decoration: none; font-size: 0.85rem;
+            border-radius: 8px; transition: all 0.15s;
+        }
+        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .user-dropdown-menu .divider {
+            height: 1px; background: rgba(255,255,255,0.08); margin: 0.3rem 0.5rem;
+        }
+        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
+        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
         @media (max-width: 768px) {
             .dash-sidebar { display: none; }
             .dash-main { padding: 1.5rem; }
@@ -136,8 +168,17 @@
                 <h1>Bienvenido a Meli</h1>
             </div>
             <div style="display:flex;align-items:center;gap:1rem;">
-                <span id="userBadge" style="font-size:0.85rem;color:var(--text-secondary);">Cargando...</span>
-                <button class="btn btn-outline" id="logoutBtn" style="padding:0.4rem 1.2rem;font-size:0.8rem;">Salir</button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="avatar" id="userAvatar">M</div>
+                    <span class="name" id="userName">Cargando...</span>
+                    <span class="arrow">▼</span>
+                    <div class="user-dropdown-menu">
+                        <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                        <a href="preferencias.html">🎨 Preferencias</a>
+                        <div class="divider"></div>
+                        <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -180,14 +221,27 @@
 
     const profile = await getUserProfile()
     if (profile) {
-        document.getElementById('userBadge').textContent = `👤 ${profile.name}`
+        if (!profile.setup_complete) { window.location.href = 'setup.html'; throw new Error() }
+        document.getElementById('userName').textContent = profile.name
+        document.getElementById('userAvatar').textContent = profile.name.charAt(0).toUpperCase()
         if (profile.role === 'admin') {
             document.getElementById('adminLabel').style.display = 'block'
             document.getElementById('adminLink').style.display = 'flex'
         }
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => logout())
+    const dd = document.getElementById('userDropdown')
+    dd.addEventListener('click', (e) => {
+        if (e.target.closest('.user-dropdown-menu')) return
+        dd.classList.toggle('open')
+    })
+    document.addEventListener('click', (e) => {
+        if (!dd.contains(e.target)) dd.classList.remove('open')
+    })
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault(); logout()
+    })
 </script>
 </body>
 </html>

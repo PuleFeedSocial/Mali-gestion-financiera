@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meli | Configura tu cuenta</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .setup-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top, #30605e 0%, #2d2d2a 60%);
+            padding: 2rem;
+        }
+        .setup-card {
+            background: #1f1f1d;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 560px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.5);
+        }
+        .setup-card .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .setup-card .logo span { color: var(--accent); }
+        .setup-card h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .setup-card .sub {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        .setup-card .step {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .setup-card .step .num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .setup-card .step .num.inactive {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+        }
+        .setup-card .field { margin-bottom: 1.5rem; }
+        .setup-card .field label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        .setup-card select, .setup-card input, .setup-card textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .setup-card select:focus, .setup-card input:focus, .setup-card textarea:focus {
+            border-color: var(--accent);
+        }
+        .setup-card select option { background: #1f1f1d; color: white; }
+        .setup-card .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+        .setup-card .checkbox-grid .opt {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        .setup-card .checkbox-grid .opt:hover {
+            border-color: var(--accent);
+            background: rgba(199,239,0,0.05);
+        }
+        .setup-card .checkbox-grid .opt.selected {
+            border-color: var(--accent);
+            background: rgba(199,239,0,0.1);
+        }
+        .setup-card .checkbox-grid .opt input { display: none; }
+        .setup-card .checkbox-grid .opt .check {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .setup-card .checkbox-grid .opt.selected .check {
+            border-color: var(--accent);
+            background: var(--accent);
+        }
+        .setup-card .checkbox-grid .opt.selected .check::after {
+            content: '✓';
+            color: var(--bg-color);
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+
+        .msg {
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
+
+        @media (max-width: 768px) {
+            .setup-card { padding: 2rem 1.5rem; }
+            .setup-card .checkbox-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="setup-wrapper">
+    <div class="setup-card">
+        <div class="logo">Meli<span>.</span></div>
+        <h1>Configurá tu cuenta</h1>
+        <p class="sub">Personalizá Meli para aprovecharlo al máximo.</p>
+
+        <div id="setupMsg" class="msg"></div>
+
+        <div class="step">
+            <div class="num">1</div>
+            <span style="font-weight:500;">¿Con qué moneda trabajás?</span>
+        </div>
+        <div class="field">
+            <select id="currency">
+                <option value="USD">USD - Dólar estadounidense</option>
+                <option value="ARS">ARS - Peso argentino</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="BRL">BRL - Real brasileño</option>
+                <option value="CLP">CLP - Peso chileno</option>
+                <option value="COP">COP - Peso colombiano</option>
+                <option value="MXN">MXN - Peso mexicano</option>
+                <option value="PEN">PEN - Sol peruano</option>
+                <option value="UYU">UYU - Peso uruguayo</option>
+                <option value="BOB">BOB - Boliviano</option>
+                <option value="PYG">PYG - Guaraní paraguayo</option>
+                <option value="GBP">GBP - Libra esterlina</option>
+                <option value="CAD">CAD - Dólar canadiense</option>
+                <option value="JPY">JPY - Yen japonés</option>
+                <option value="CNY">CNY - Yuan chino</option>
+            </select>
+        </div>
+
+        <div class="step">
+            <div class="num">2</div>
+            <span style="font-weight:500;">¿Para qué vas a usar Meli?</span>
+        </div>
+        <div class="field" id="goalsContainer">
+            <div class="checkbox-grid">
+                <label class="opt" data-value="finanzas">
+                    <input type="checkbox" value="finanzas">
+                    <span class="check"></span>
+                    Gestionar finanzas personales
+                </label>
+                <label class="opt" data-value="gastos">
+                    <input type="checkbox" value="gastos">
+                    <span class="check"></span>
+                    Controlar gastos diarios
+                </label>
+                <label class="opt" data-value="ahorros">
+                    <input type="checkbox" value="ahorros">
+                    <span class="check"></span>
+                    Ahorrar para objetivos
+                </label>
+                <label class="opt" data-value="proyectos">
+                    <input type="checkbox" value="proyectos">
+                    <span class="check"></span>
+                    Organizar proyectos
+                </label>
+                <label class="opt" data-value="tiempo">
+                    <input type="checkbox" value="tiempo">
+                    <span class="check"></span>
+                    Gestionar mi tiempo
+                </label>
+                <label class="opt" data-value="negocio">
+                    <input type="checkbox" value="negocio">
+                    <span class="check"></span>
+                    Administrar un negocio
+                </label>
+                <label class="opt" data-value="otro" style="grid-column:1/-1;">
+                    <input type="checkbox" value="otro">
+                    <span class="check"></span>
+                    Otro
+                </label>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" id="setupBtn" style="width:100%;margin-top:1rem;">Ir al Dashboard</button>
+
+        <p style="text-align:center;color:var(--text-secondary);font-size:0.8rem;margin-top:1rem;">
+            Podés cambiar esto después desde Preferencias.
+        </p>
+    </div>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, completeSetup } from '../script/auth.js'
+
+    const session = await requireAuth('acceder-formulario.html')
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    if (profile && profile.setup_complete) {
+        window.location.href = 'dashboard.html'
+        throw new Error()
+    }
+
+    document.querySelectorAll('.opt').forEach(el => {
+        el.addEventListener('click', function () {
+            const cb = this.querySelector('input')
+            cb.checked = !cb.checked
+            this.classList.toggle('selected', cb.checked)
+        })
+    })
+
+    document.getElementById('setupBtn').addEventListener('click', async function () {
+        const currency = document.getElementById('currency').value
+        const checked = document.querySelectorAll('#goalsContainer input:checked')
+        const goals = Array.from(checked).map(c => c.value).join(',')
+
+        if (goals.length === 0) {
+            const msg = document.getElementById('setupMsg')
+            msg.textContent = 'Seleccioná al menos un objetivo.'
+            msg.className = 'msg error'
+            return
+        }
+
+        this.textContent = 'Guardando...'
+        this.disabled = true
+
+        try {
+            await completeSetup(currency, goals)
+            window.location.href = 'dashboard.html'
+        } catch (e) {
+            const msg = document.getElementById('setupMsg')
+            msg.textContent = 'Error: ' + e.message
+            msg.className = 'msg error'
+            this.textContent = 'Ir al Dashboard'
+            this.disabled = false
+        }
+    })
+</script>
+</body>
+</html>
