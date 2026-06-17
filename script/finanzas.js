@@ -6,7 +6,7 @@ export async function getBalance() {
 
   const [txData, debtData] = await Promise.all([
     supabase.from('transactions').select('type, amount').eq('user_id', session.user.id),
-    supabase.from('debts').select('type, amount, status').eq('user_id', session.user.id).eq('status', 'pendiente')
+    supabase.from('debts').select('type, amount, total_amount, installments, installments_paid, status').eq('user_id', session.user.id).eq('status', 'pendiente')
   ])
 
   if (txData.error) throw txData.error
@@ -18,8 +18,9 @@ export async function getBalance() {
     else total.gastos += Number(t.amount)
   }
   for (const d of debtData.data) {
-    if (d.type === 'por_cobrar') total.por_cobrar += Number(d.amount)
-    else total.por_pagar += Number(d.amount)
+    const remaining = Number(d.amount)
+    if (d.type === 'por_cobrar') total.por_cobrar += remaining
+    else total.por_pagar += remaining
   }
   total.balance = total.ingresos - total.gastos + total.por_cobrar - total.por_pagar
   return total
@@ -148,15 +149,22 @@ export async function processScheduled() {
   }
 }
 
-export async function addDebt({ type, debtor, amount, description, dueDate }) {
+export async function addDebt({ type, debtor, amount, description, dueDate, installments = 1 }) {
   const session = await getSession()
   if (!session) throw new Error('No hay sesión.')
+
+  const total = Number(amount)
+  const inst = Math.max(1, Math.floor(Number(installments)))
+  const installmentAmount = inst > 0 ? total / inst : total
 
   const { error } = await supabase.from('debts').insert({
     user_id: session.user.id,
     type,
     debtor,
-    amount,
+    amount: inst === 1 ? total : installmentAmount,
+    total_amount: total,
+    installments: inst,
+    installments_paid: 0,
     description,
     due_date: dueDate
   })
@@ -181,6 +189,50 @@ export async function getDebts({ status, type } = {}) {
   return data || []
 }
 
+export async function payInstallment(id) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+
+  const { data: debt, error: fetchError } = await supabase
+    .from('debts')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', session.user.id)
+    .single()
+  if (fetchError) throw fetchError
+  if (!debt) throw new Error('Deuda no encontrada.')
+  if (debt.status !== 'pendiente') throw new Error('Esta deuda ya está saldada.')
+  if (debt.installments_paid >= debt.installments) throw new Error('Todas las cuotas ya fueron pagadas.')
+
+  const totalAmt = Number(debt.total_amount) || Number(debt.amount) * Number(debt.installments)
+  const instAmt = debt.installments > 0 ? totalAmt / Number(debt.installments) : totalAmt
+  const newPaid = Number(debt.installments_paid) + 1
+  const newAmount = totalAmt - (instAmt * newPaid)
+  const isComplete = newPaid >= Number(debt.installments)
+
+  const { error: updateError } = await supabase
+    .from('debts')
+    .update({
+      amount: Math.max(0, newAmount),
+      installments_paid: newPaid,
+      status: isComplete ? (debt.type === 'por_cobrar' ? 'cobrado' : 'pagado') : 'pendiente'
+    })
+    .eq('id', id)
+    .eq('user_id', session.user.id)
+  if (updateError) throw updateError
+
+  const txType = debt.type === 'por_cobrar' ? 'ingreso' : 'gasto'
+  const txSub = debt.type === 'por_cobrar' ? 'instantaneo' : 'variable'
+  await supabase.from('transactions').insert({
+    user_id: session.user.id,
+    type: txType,
+    subtype: txSub,
+    amount: instAmt,
+    description: `${txType === 'ingreso' ? 'Cobro' : 'Pago'} cuota ${newPaid}/${debt.installments}: ${debt.debtor} - ${debt.description}`,
+    date: new Date().toISOString().split('T')[0]
+  })
+}
+
 export async function updateDebtStatus(id, newStatus) {
   const session = await getSession()
   if (!session) throw new Error('No hay sesión.')
@@ -194,9 +246,12 @@ export async function updateDebtStatus(id, newStatus) {
   if (fetchError) throw fetchError
   if (!debt) throw new Error('Deuda no encontrada.')
 
+  const totalAmt = Number(debt.total_amount) || Number(debt.amount) * Number(debt.installments)
+  const remaining = Number(debt.amount)
+
   const { error: updateError } = await supabase
     .from('debts')
-    .update({ status: newStatus })
+    .update({ status: newStatus, amount: 0, installments_paid: debt.installments })
     .eq('id', id)
     .eq('user_id', session.user.id)
   if (updateError) throw updateError
@@ -206,8 +261,8 @@ export async function updateDebtStatus(id, newStatus) {
       user_id: session.user.id,
       type: 'ingreso',
       subtype: 'instantaneo',
-      amount: debt.amount,
-      description: `Cobro: ${debt.debtor} - ${debt.description}`,
+      amount: remaining,
+      description: `Cobro total: ${debt.debtor} - ${debt.description}`,
       date: new Date().toISOString().split('T')[0]
     })
   } else if (newStatus === 'pagado') {
@@ -215,8 +270,8 @@ export async function updateDebtStatus(id, newStatus) {
       user_id: session.user.id,
       type: 'gasto',
       subtype: 'variable',
-      amount: debt.amount,
-      description: `Pago: ${debt.debtor} - ${debt.description}`,
+      amount: remaining,
+      description: `Pago total: ${debt.debtor} - ${debt.description}`,
       date: new Date().toISOString().split('T')[0]
     })
   }

@@ -80,7 +80,7 @@
 
         .form-deuda {
             display: grid;
-            grid-template-columns: 1fr 1.5fr 1fr 1.5fr 1fr auto;
+            grid-template-columns: 1fr 1.5fr 1fr 1fr 1.5fr 1fr auto;
             gap: 0.8rem; align-items: end;
         }
         .form-deuda .field { display: flex; flex-direction: column; gap: 0.3rem; }
@@ -150,6 +150,9 @@
         .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
         .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
 
+        @media (max-width: 1200px) {
+            .form-deuda { grid-template-columns: 1fr 1fr 1fr; }
+        }
         @media (max-width: 1100px) {
             .form-deuda { grid-template-columns: 1fr 1fr; }
             .resumen-grid { grid-template-columns: 1fr 1fr; }
@@ -236,15 +239,19 @@
                     <input type="text" id="fDeudor" placeholder="Nombre de quien te debe/debes">
                 </div>
                 <div class="field">
-                    <label>Monto ($)</label>
+                    <label>Monto total ($)</label>
                     <input type="number" id="fMonto" step="0.01" min="0.01" placeholder="0.00">
+                </div>
+                <div class="field">
+                    <label>Cuotas</label>
+                    <input type="number" id="fCuotas" min="1" max="120" value="1" placeholder="1">
                 </div>
                 <div class="field">
                     <label>Descripción</label>
                     <input type="text" id="fDesc" placeholder="Ej: Préstamo, compra...">
                 </div>
                 <div class="field">
-                    <label>Fecha de cobro/pago</label>
+                    <label>Fecha de vencimiento</label>
                     <input type="date" id="fFecha">
                 </div>
                 <div class="field">
@@ -273,13 +280,15 @@
                             <th>Tipo</th>
                             <th>Persona</th>
                             <th>Concepto</th>
-                            <th>Monto</th>
+                            <th>Total</th>
+                            <th>Cuotas</th>
+                            <th>Saldo</th>
                             <th>Estado</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody id="deudasBody">
-                        <tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>
+<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -289,7 +298,7 @@
 
 <script type="module">
     import { requireAuth, getUserProfile, logout } from '../script/auth.js'
-    import { getBalance, addDebt, getDebts, updateDebtStatus, deleteDebt } from '../script/finanzas.js'
+    import { getBalance, addDebt, getDebts, payInstallment, updateDebtStatus, deleteDebt } from '../script/finanzas.js'
 
     const session = await requireAuth()
     if (!session) throw new Error()
@@ -351,7 +360,7 @@
     function renderDeudas(deudas) {
         const tbody = document.getElementById('deudasBody')
         if (!deudas.length) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>'
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>'
             return
         }
         tbody.innerHTML = deudas.map(d => {
@@ -360,29 +369,43 @@
             const signo = d.type === 'por_cobrar' ? '+' : '-'
             const estadoCls = d.vencida ? 'vencida' : d.status
             const estadoTxt = d.vencida ? 'Vencida' : { pendiente: 'Pendiente', cobrado: 'Cobrada', pagado: 'Pagada', cancelado: 'Cancelada' }[d.status]
+
+            const totalAmt = Number(d.total_amount) || Number(d.amount)
+            const inst = Number(d.installments) || 1
+            const paid = Number(d.installments_paid) || 0
+            const remaining = Number(d.amount)
+
             let acciones = ''
-            if (d.status === 'pendiente') {
-                const accion = d.type === 'por_cobrar' ? 'cobrado' : 'pagado'
-                const txtBtn = d.type === 'por_cobrar' ? 'Cobrar' : 'Pagar'
-                acciones = `<button class="small-btn primary-hover" onclick="cobrarPagar(${d.id},'${accion}')">${txtBtn}</button>`
-                acciones += `<button class="small-btn danger-hover" onclick="cancelar(${d.id})">Cancelar</button>`
+            if (d.status === 'pendiente' && paid < inst) {
+                acciones = `<button class="small-btn primary-hover" onclick="pagarCuota(${d.id})">${d.type === 'por_cobrar' ? 'Cobrar' : 'Pagar'} cuota</button>`
+                if (paid === 0) acciones += `<button class="small-btn danger-hover" onclick="cancelar(${d.id})">Cancelar</button>`
             }
+
             return `<tr>
                 <td style="color:${d.vencida ? '#ff6b6b' : 'var(--text-secondary)'};font-size:0.85rem;">${vence}</td>
                 <td>${d.type === 'por_cobrar' ? '💰 Cobrar' : '💸 Pagar'}</td>
                 <td>${d.debtor}</td>
                 <td style="color:var(--text-secondary);font-size:0.8rem;">${d.description || '-'}</td>
-                <td class="monto ${cls}">${signo}$${fm(d.amount)}</td>
+                <td class="monto ${cls}">${signo}$${fm(totalAmt)}</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:0.4rem;">
+                        <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;min-width:50px;">
+                            <div style="width:${inst > 0 ? (paid/inst*100) : 0}%;height:4px;background:${paid === inst ? 'var(--accent)' : 'rgba(199,239,0,0.5)'};border-radius:2px;transition:width 0.3s;"></div>
+                        </div>
+                        <span style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;">${paid}/${inst}</span>
+                    </div>
+                </td>
+                <td class="monto ${cls}">${signo}$${fm(remaining)}</td>
                 <td><span class="badge ${estadoCls}">${estadoTxt}</span></td>
                 <td>${acciones}</td>
             </tr>`
         }).join('')
     }
 
-    window.cobrarPagar = async function(id, accion) {
+    window.pagarCuota = async function(id) {
         try {
-            await updateDebtStatus(id, accion)
-            showMsg('Deuda actualizada.', 'success')
+            await payInstallment(id)
+            showMsg('Cuota registrada.', 'success')
             await Promise.all([cargarResumen(), cargarDeudas()])
         } catch (e) { showMsg('Error: ' + e.message, 'error') }
     }
@@ -400,17 +423,22 @@
         const tipo = document.getElementById('fTipo').value
         const debtor = document.getElementById('fDeudor').value.trim()
         const amount = parseFloat(document.getElementById('fMonto').value)
+        const cuotas = parseInt(document.getElementById('fCuotas').value) || 1
         const description = document.getElementById('fDesc').value.trim()
         const dueDate = document.getElementById('fFecha').value
 
         if (!debtor) { showMsg('Ingresá el nombre de la persona o entidad.', 'error'); return }
         if (!amount || amount <= 0) { showMsg('Ingresá un monto válido.', 'error'); return }
+        if (cuotas < 1) { showMsg('Las cuotas deben ser al menos 1.', 'error'); return }
         if (!dueDate) { showMsg('Seleccioná una fecha.', 'error'); return }
 
         try {
-            await addDebt({ type: tipo, debtor, amount, description, dueDate })
+            await addDebt({ type: tipo, debtor, amount, description, dueDate, installments: cuotas })
             showMsg('Deuda registrada.', 'success')
-            document.getElementById('fDeudor').value = ''; document.getElementById('fMonto').value = ''; document.getElementById('fDesc').value = ''
+            document.getElementById('fDeudor').value = ''
+            document.getElementById('fMonto').value = ''
+            document.getElementById('fCuotas').value = '1'
+            document.getElementById('fDesc').value = ''
             document.getElementById('fFecha').value = new Date().toISOString().split('T')[0]
             await Promise.all([cargarResumen(), cargarDeudas()])
         } catch (e) { showMsg('Error: ' + e.message, 'error') }
