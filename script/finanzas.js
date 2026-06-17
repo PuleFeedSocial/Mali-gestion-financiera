@@ -1,5 +1,28 @@
 import { supabase, getSession } from './auth.js'
 
+const META_PREFIX = '__META__'
+
+function metaEncode(total, inst, paid) {
+  return JSON.stringify({ t: total, i: inst, p: paid })
+}
+
+function metaDecode(desc) {
+  if (!desc) return null
+  const idx = desc.lastIndexOf(META_PREFIX)
+  if (idx === -1) return null
+  try {
+    return JSON.parse(desc.slice(idx + META_PREFIX.length))
+  } catch {
+    return null
+  }
+}
+
+function metaStrip(desc) {
+  if (!desc) return desc
+  const idx = desc.lastIndexOf(META_PREFIX)
+  return idx === -1 ? desc : desc.slice(0, idx).trim()
+}
+
 let _hasInstallments = null
 
 async function hasInstallmentsColumn() {
@@ -16,23 +39,6 @@ async function hasInstallmentsColumn() {
     _hasInstallments = false
   }
   return _hasInstallments
-}
-
-async function tryMigrate() {
-  const sql = `
-    ALTER TABLE debts 
-    ADD COLUMN IF NOT EXISTS total_amount numeric DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS installments integer DEFAULT 1,
-    ADD COLUMN IF NOT EXISTS installments_paid integer DEFAULT 0;
-    UPDATE debts SET total_amount = amount WHERE total_amount = 0 OR total_amount IS NULL;
-    UPDATE debts SET installments_paid = installments WHERE status IN ('cobrado','pagado') AND installments_paid = 0;
-  `
-  try {
-    const { error } = await supabase.rpc('exec_sql', { query: sql })
-    if (!error) _hasInstallments = true
-  } catch {
-    // noop
-  }
 }
 
 export async function getBalance() {
@@ -211,51 +217,35 @@ export async function addDebt({ type, debtor, amount, description, dueDate, inst
   const session = await getSession()
   if (!session) throw new Error('No hay sesión.')
 
-  const hasInst = await hasInstallmentsColumn()
   const total = Number(amount)
   const inst = Math.max(1, Math.floor(Number(installments)))
+  const installmentAmount = inst > 0 ? total / inst : total
+  const isMulti = inst > 1
 
-  if (hasInst) {
-    const installmentAmount = inst > 0 ? total / inst : total
+  if (await hasInstallmentsColumn()) {
     const { error } = await supabase.from('debts').insert({
       user_id: session.user.id,
-      type,
-      debtor,
+      type, debtor,
       amount: inst === 1 ? total : installmentAmount,
       total_amount: total,
       installments: inst,
       installments_paid: 0,
-      description,
+      description: description || '',
       due_date: dueDate
     })
     if (error) throw error
   } else {
-    await tryMigrate()
-    if (await hasInstallmentsColumn()) {
-      const installmentAmount = inst > 0 ? total / inst : total
-      const { error } = await supabase.from('debts').insert({
-        user_id: session.user.id,
-        type,
-        debtor,
-        amount: inst === 1 ? total : installmentAmount,
-        total_amount: total,
-        installments: inst,
-        installments_paid: 0,
-        description,
-        due_date: dueDate
-      })
-      if (error) throw error
-    } else {
-      const { error } = await supabase.from('debts').insert({
-        user_id: session.user.id,
-        type,
-        debtor,
-        amount: total,
-        description,
-        due_date: dueDate
-      })
-      if (error) throw error
-    }
+    const desc = isMulti
+      ? (description || '') + '\n' + META_PREFIX + metaEncode(total, inst, 0)
+      : (description || '')
+    const { error } = await supabase.from('debts').insert({
+      user_id: session.user.id,
+      type, debtor,
+      amount: total,
+      description: desc,
+      due_date: dueDate
+    })
+    if (error) throw error
   }
 }
 
@@ -276,29 +266,40 @@ export async function getDebts({ status, type } = {}) {
 
   const { data, error } = await query
   if (error) throw error
+  if (!data) return []
 
-  if (data && !hasInst) {
-    return data.map(d => ({
+  return data.map(d => {
+    if (hasInst) {
+      return {
+        ...d,
+        total_amount: Number(d.total_amount) || Number(d.amount),
+        installments: Number(d.installments) || 1,
+        installments_paid: Number(d.installments_paid) || 0
+      }
+    }
+    const meta = metaDecode(d.description)
+    if (meta) {
+      return {
+        ...d,
+        description: metaStrip(d.description),
+        total_amount: meta.t,
+        installments: meta.i,
+        installments_paid: meta.p,
+        amount: meta.t - (meta.t / meta.i * meta.p)
+      }
+    }
+    return {
       ...d,
       total_amount: Number(d.amount),
       installments: 1,
       installments_paid: d.status === 'pendiente' ? 0 : 1
-    }))
-  }
-  return data || []
+    }
+  })
 }
 
 export async function payInstallment(id) {
   const session = await getSession()
   if (!session) throw new Error('No hay sesión.')
-
-  const hasInst = await hasInstallmentsColumn()
-  if (!hasInst) {
-    await tryMigrate()
-    if (!(await hasInstallmentsColumn())) {
-      throw new Error('Necesitás migrar la base de datos. Ejecutá el SQL en sql/migrate-debts-installments.sql desde el panel de Supabase.')
-    }
-  }
 
   const { data: debt, error: fetchError } = await supabase
     .from('debts')
@@ -308,25 +309,59 @@ export async function payInstallment(id) {
     .single()
   if (fetchError) throw fetchError
   if (!debt) throw new Error('Deuda no encontrada.')
+
+  const hasInst = await hasInstallmentsColumn()
+
+  let totalAmt, instCount, paidCount, instAmt
+  let cleanDesc = debt.description || ''
+
+  if (hasInst) {
+    totalAmt = Number(debt.total_amount) || Number(debt.amount) * Number(debt.installments)
+    instCount = Number(debt.installments) || 1
+    paidCount = Number(debt.installments_paid) || 0
+  } else {
+    const meta = metaDecode(debt.description)
+    if (!meta) throw new Error('Esta deuda no tiene cuotas.')
+    totalAmt = meta.t
+    instCount = meta.i
+    paidCount = meta.p
+    cleanDesc = metaStrip(debt.description)
+  }
+
   if (debt.status !== 'pendiente') throw new Error('Esta deuda ya está saldada.')
-  if (debt.installments_paid >= debt.installments) throw new Error('Todas las cuotas ya fueron pagadas.')
+  if (paidCount >= instCount) throw new Error('Todas las cuotas ya fueron pagadas.')
 
-  const totalAmt = Number(debt.total_amount) || Number(debt.amount) * Number(debt.installments)
-  const instAmt = debt.installments > 0 ? totalAmt / Number(debt.installments) : totalAmt
-  const newPaid = Number(debt.installments_paid) + 1
+  instAmt = instCount > 0 ? totalAmt / instCount : totalAmt
+  const newPaid = paidCount + 1
   const newAmount = totalAmt - (instAmt * newPaid)
-  const isComplete = newPaid >= Number(debt.installments)
+  const isComplete = newPaid >= instCount
 
-  const { error: updateError } = await supabase
-    .from('debts')
-    .update({
-      amount: Math.max(0, newAmount),
-      installments_paid: newPaid,
-      status: isComplete ? (debt.type === 'por_cobrar' ? 'cobrado' : 'pagado') : 'pendiente'
-    })
-    .eq('id', id)
-    .eq('user_id', session.user.id)
-  if (updateError) throw updateError
+  if (hasInst) {
+    const { error: updateError } = await supabase
+      .from('debts')
+      .update({
+        amount: Math.max(0, newAmount),
+        installments_paid: newPaid,
+        status: isComplete ? (debt.type === 'por_cobrar' ? 'cobrado' : 'pagado') : 'pendiente'
+      })
+      .eq('id', id)
+      .eq('user_id', session.user.id)
+    if (updateError) throw updateError
+  } else {
+    const newDesc = isComplete
+      ? cleanDesc
+      : cleanDesc + '\n' + META_PREFIX + metaEncode(totalAmt, instCount, newPaid)
+    const { error: updateError } = await supabase
+      .from('debts')
+      .update({
+        amount: Math.max(0, newAmount),
+        description: newDesc,
+        status: isComplete ? (debt.type === 'por_cobrar' ? 'cobrado' : 'pagado') : 'pendiente'
+      })
+      .eq('id', id)
+      .eq('user_id', session.user.id)
+    if (updateError) throw updateError
+  }
 
   const txType = debt.type === 'por_cobrar' ? 'ingreso' : 'gasto'
   const txSub = debt.type === 'por_cobrar' ? 'instantaneo' : 'variable'
@@ -335,7 +370,7 @@ export async function payInstallment(id) {
     type: txType,
     subtype: txSub,
     amount: instAmt,
-    description: `${txType === 'ingreso' ? 'Cobro' : 'Pago'} cuota ${newPaid}/${debt.installments}: ${debt.debtor} - ${debt.description}`,
+    description: `${txType === 'ingreso' ? 'Cobro' : 'Pago'} cuota ${newPaid}/${instCount}: ${debt.debtor} - ${cleanDesc}`,
     date: new Date().toISOString().split('T')[0]
   })
 }
@@ -355,6 +390,7 @@ export async function updateDebtStatus(id, newStatus) {
 
   const hasInst = await hasInstallmentsColumn()
   const remaining = Number(debt.amount)
+  const cleanDesc = hasInst ? (debt.description || '') : metaStrip(debt.description || '')
 
   if (hasInst) {
     const { error: updateError } = await supabase
@@ -366,7 +402,7 @@ export async function updateDebtStatus(id, newStatus) {
   } else {
     const { error: updateError } = await supabase
       .from('debts')
-      .update({ status: newStatus })
+      .update({ status: newStatus, description: cleanDesc })
       .eq('id', id)
       .eq('user_id', session.user.id)
     if (updateError) throw updateError
@@ -378,7 +414,7 @@ export async function updateDebtStatus(id, newStatus) {
       type: 'ingreso',
       subtype: 'instantaneo',
       amount: remaining,
-      description: `Cobro total: ${debt.debtor} - ${debt.description}`,
+      description: `Cobro total: ${debt.debtor} - ${cleanDesc}`,
       date: new Date().toISOString().split('T')[0]
     })
   } else if (newStatus === 'pagado') {
@@ -387,7 +423,7 @@ export async function updateDebtStatus(id, newStatus) {
       type: 'gasto',
       subtype: 'variable',
       amount: remaining,
-      description: `Pago total: ${debt.debtor} - ${debt.description}`,
+      description: `Pago total: ${debt.debtor} - ${cleanDesc}`,
       date: new Date().toISOString().split('T')[0]
     })
   }
