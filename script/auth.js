@@ -87,3 +87,5 @@ export async function getUserProfile() {
     .single()
   return data
 }
+
+export { supabase }

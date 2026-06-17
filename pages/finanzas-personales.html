@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meli | Finanzas Personales</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .fp-wrapper { display: flex; min-height: 100vh; }
+        .fp-sidebar {
+            width: 240px;
+            background-color: #1f1f1d;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem 0;
+            flex-shrink: 0;
+        }
+        .fp-sidebar .logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 1.4rem;
+        }
+        .fp-sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.7rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .fp-sidebar nav a:hover {
+            color: var(--accent);
+            background: rgba(199,239,0,0.05);
+        }
+        .fp-sidebar nav a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(199,239,0,0.08);
+        }
+        .fp-sidebar .nav-label {
+            padding: 1rem 1.5rem 0.5rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3);
+            font-weight: 600;
+        }
+        .fp-sidebar nav a.sub {
+            padding-left: 3rem;
+            font-size: 0.85rem;
+        }
+        .fp-main { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
+        .fp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .fp-header h1 { font-size: 1.6rem; letter-spacing: -0.5px; }
+        .fp-header .breadcrumb {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .fp-header .breadcrumb span { color: var(--accent); }
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .balance-card {
+            background: var(--surface-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .balance-card .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+        .balance-card .amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        .balance-card .amount.positive { color: var(--accent); }
+        .balance-card .amount.negative { color: #ff6b6b; }
+        .balance-card.ingresos { border-color: rgba(199,239,0,0.2); }
+        .balance-card.gastos { border-color: rgba(255,107,107,0.2); }
+        .balance-card.total { background: linear-gradient(145deg, #30605e, #244948); }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.8rem;
+            align-items: end;
+        }
+        .form-grid .field { display: flex; flex-direction: column; gap: 0.3rem; }
+        .form-grid .field label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .form-grid select, .form-grid input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-grid select:focus, .form-grid input:focus { border-color: var(--accent); }
+        .form-grid select option { background: #1f1f1d; color: white; }
+        .form-grid .day-field { display: none; }
+        .form-grid .day-field.visible { display: flex; }
+
+        .add-section {
+            background: #1f1f1d;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            background: #1f1f1d;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        table.movimientos {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        table.movimientos th {
+            text-align: left;
+            padding: 1rem 1.2rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+        table.movimientos td {
+            padding: 0.9rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        table.movimientos tr:hover td { background: rgba(255,255,255,0.02); }
+        table.movimientos .monto { font-weight: 600; }
+        table.movimientos .monto.ingreso { color: var(--accent); }
+        table.movimientos .monto.gasto { color: #ff6b6b; }
+        table.movimientos .badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            color: var(--text-secondary);
+        }
+        table.movimientos .badge.fijo { background: rgba(199,239,0,0.15); color: var(--accent); }
+        table.movimientos .badge.variable { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+        table.movimientos .badge.hormiga { background: rgba(255,165,0,0.15); color: #ffa500; }
+        table.movimientos .badge.instantaneo { background: rgba(100,200,255,0.15); color: #64c8ff; }
+        table.movimientos .delete-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.2);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.2rem;
+            transition: color 0.2s;
+        }
+        table.movimientos .delete-btn:hover { color: #ff6b6b; }
+
+        .msg {
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.15); border: 1px solid rgba(199,239,0,0.3); color: var(--accent); }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        @media (max-width: 768px) {
+            .fp-sidebar { display: none; }
+            .fp-main { padding: 1.5rem; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="fp-wrapper">
+    <aside class="fp-sidebar">
+        <div class="logo">Meli<span>.</span></div>
+        <nav>
+            <div class="nav-label">Navegación</div>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <div class="nav-label">Finanzas</div>
+            <a href="finanzas-personales.html" class="active">💰 Finanzas personales</a>
+            <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            <div class="nav-label">Próximamente</div>
+            <a href="#" style="opacity:0.4;">⏱️ Gestión de Tiempo</a>
+            <a href="#" style="opacity:0.4;">📁 Organización</a>
+        </nav>
+    </aside>
+
+    <main class="fp-main">
+        <div class="fp-header">
+            <div>
+                <div class="breadcrumb">💰 Finanzas / <span>Finanzas personales</span></div>
+                <h1>Finanzas Personales</h1>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <span id="userBadge" style="font-size:0.85rem;color:var(--text-secondary);">Cargando...</span>
+                <button class="btn btn-outline" id="logoutBtn" style="padding:0.4rem 1.2rem;font-size:0.8rem;">Salir</button>
+            </div>
+        </div>
+
+        <div id="msg" class="msg"></div>
+
+        <div class="balance-grid" id="balanceGrid">
+            <div class="balance-card ingresos">
+                <div class="label">💰 Ingresos totales</div>
+                <div class="amount positive" id="totalIngresos">$0.00</div>
+            </div>
+            <div class="balance-card gastos">
+                <div class="label">💸 Gastos totales</div>
+                <div class="amount negative" id="totalGastos">$0.00</div>
+            </div>
+            <div class="balance-card total">
+                <div class="label">⚖️ Balance total</div>
+                <div class="amount" id="totalBalance">$0.00</div>
+            </div>
+        </div>
+
+        <div class="add-section">
+            <div class="section-title">➕ Registrar movimiento</div>
+            <div class="form-grid" id="addForm">
+                <div class="field">
+                    <label>Tipo</label>
+                    <select id="fTipo">
+                        <option value="ingreso">Ingreso</option>
+                        <option value="gasto">Gasto</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Subtipo</label>
+                    <select id="fSubtipo"></select>
+                </div>
+                <div class="field">
+                    <label>Monto ($)</label>
+                    <input type="number" id="fMonto" step="0.01" min="0.01" placeholder="0.00">
+                </div>
+                <div class="field">
+                    <label>Descripción</label>
+                    <input type="text" id="fDesc" placeholder="Ej: Alquiler, Sueldo...">
+                </div>
+                <div class="field">
+                    <label>Fecha</label>
+                    <input type="date" id="fFecha">
+                </div>
+                <div class="field day-field" id="dayField">
+                    <label>Día del mes</label>
+                    <input type="number" id="fDia" min="1" max="31" placeholder="1-31">
+                </div>
+                <div class="field">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" id="addBtn" style="padding:0.6rem 1.5rem;font-size:0.9rem;">Agregar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title" id="movimientos">📋 Últimos movimientos</div>
+        <div class="table-wrap">
+            <table class="movimientos">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Subtipo</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="movimientosBody">
+                </tbody>
+            </table>
+            <div class="empty-state" id="emptyState" style="display:none;">
+                <div class="icon">📭</div>
+                <p>Todavía no hay movimientos registrados.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
+    import { getBalance, addTransaction, getTransactions, deleteTransaction, processScheduled } from '../script/finanzas.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    if (profile) {
+        document.getElementById('userBadge').textContent = `👤 ${profile.name}`
+    }
+
+    const msg = document.getElementById('msg')
+    function showMsg(text, type) {
+        msg.textContent = text
+        msg.className = `msg ${type}`
+        setTimeout(() => { msg.className = 'msg' }, 4000)
+    }
+
+    const subtipos = {
+        ingreso: [{ v: 'fijo', t: 'Fijo' }, { v: 'instantaneo', t: 'Instantáneo' }],
+        gasto: [{ v: 'fijo', t: 'Fijo' }, { v: 'variable', t: 'Variable' }, { v: 'hormiga', t: 'Hormiga' }]
+    }
+
+    const fTipo = document.getElementById('fTipo')
+    const fSubtipo = document.getElementById('fSubtipo')
+    const fMonto = document.getElementById('fMonto')
+    const fDesc = document.getElementById('fDesc')
+    const fFecha = document.getElementById('fFecha')
+    const fDia = document.getElementById('fDia')
+    const dayField = document.getElementById('dayField')
+
+    function actualizarSubtipos() {
+        const tipo = fTipo.value
+        fSubtipo.innerHTML = ''
+        subtipos[tipo].forEach(s => {
+            const opt = document.createElement('option')
+            opt.value = s.v; opt.textContent = s.t
+            fSubtipo.appendChild(opt)
+        })
+        toggleDayField()
+    }
+
+    function toggleDayField() {
+        dayField.classList.toggle('visible', fSubtipo.value === 'fijo')
+    }
+
+    fTipo.addEventListener('change', actualizarSubtipos)
+    fSubtipo.addEventListener('change', toggleDayField)
+    fFecha.value = new Date().toISOString().split('T')[0]
+    actualizarSubtipos()
+
+    async function cargarDatos() {
+        try {
+            const balance = await getBalance()
+            if (balance) {
+                document.getElementById('totalIngresos').textContent = `$${balance.ingresos.toFixed(2)}`
+                document.getElementById('totalGastos').textContent = `$${balance.gastos.toFixed(2)}`
+                const bEl = document.getElementById('totalBalance')
+                bEl.textContent = `$${balance.balance.toFixed(2)}`
+                bEl.className = `amount ${balance.balance >= 0 ? 'positive' : 'negative'}`
+            }
+
+            await processScheduled()
+
+            const movs = await getTransactions({ limit: 100 })
+            renderMovimientos(movs)
+        } catch (e) {
+            showMsg('Error al cargar datos: ' + e.message, 'error')
+        }
+    }
+
+    function renderMovimientos(movs) {
+        const tbody = document.getElementById('movimientosBody')
+        const empty = document.getElementById('emptyState')
+
+        if (!movs || movs.length === 0) {
+            tbody.innerHTML = ''
+            empty.style.display = 'block'
+            return
+        }
+
+        empty.style.display = 'none'
+        tbody.innerHTML = movs.map(m => {
+            const fecha = new Date(m.date + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
+            const signo = m.type === 'ingreso' ? '+' : '-'
+            const cls = m.type === 'ingreso' ? 'ingreso' : 'gasto'
+            return `<tr>
+                <td style="color:var(--text-secondary);font-size:0.85rem;">${fecha}</td>
+                <td><span class="badge ${m.subtype}">${m.subtype}</span></td>
+                <td style="color:var(--text-secondary);">${m.type === 'ingreso' ? '💰 Ingreso' : '💸 Gasto'}</td>
+                <td>${m.description}</td>
+                <td class="monto ${cls}">${signo}$${Number(m.amount).toFixed(2)}</td>
+                <td><button class="delete-btn" data-id="${m.id}" title="Eliminar">✕</button></td>
+            </tr>`
+        }).join('')
+
+        tbody.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Eliminar este movimiento?')) return
+                try {
+                    await deleteTransaction(btn.dataset.id)
+                    showMsg('Movimiento eliminado.', 'success')
+                    await cargarDatos()
+                } catch (e) {
+                    showMsg('Error al eliminar.', 'error')
+                }
+            })
+        })
+    }
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        const tipo = fTipo.value
+        const subtype = fSubtipo.value
+        const amount = parseFloat(fMonto.value)
+        const description = fDesc.value.trim()
+        const date = fFecha.value
+        const dayOfMonth = subtype === 'fijo' ? parseInt(fDia.value) : null
+
+        if (!amount || amount <= 0) { showMsg('Ingresá un monto válido.', 'error'); return }
+        if (!description) { showMsg('Ingresá una descripción.', 'error'); return }
+        if (subtype === 'fijo' && (!dayOfMonth || dayOfMonth < 1 || dayOfMonth > 31)) {
+            showMsg('Ingresá un día del mes válido (1-31).', 'error'); return
+        }
+
+        try {
+            await addTransaction({ type: tipo, subtype, amount, description, date, dayOfMonth })
+            showMsg('Movimiento registrado.', 'success')
+            fMonto.value = ''; fDesc.value = ''
+            fFecha.value = new Date().toISOString().split('T')[0]
+            if (fDia) fDia.value = ''
+            await cargarDatos()
+        } catch (e) {
+            showMsg('Error: ' + e.message, 'error')
+        }
+    })
+
+    document.getElementById('logoutBtn').addEventListener('click', () => logout())
+
+    await cargarDatos()
+</script>
+</body>
+</html>
