@@ -282,7 +282,7 @@
                             <th>Concepto</th>
                             <th>Total</th>
                             <th>Cuotas</th>
-                            <th>Saldo</th>
+                            <th>Valor por Cuota</th>
                             <th>Estado</th>
                             <th></th>
                         </tr>
@@ -395,7 +395,7 @@
                         <span style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;">${paid}/${inst}</span>
                     </div>
                 </td>
-                <td class="monto ${cls}">${signo}$${fm(remaining)}</td>
+                <td class="monto ${cls}">${signo}$${fm(inst > 1 ? totalAmt / inst : totalAmt)}</td>
                 <td><span class="badge ${estadoCls}">${estadoTxt}</span></td>
                 <td>${acciones}</td>
             </tr>`
