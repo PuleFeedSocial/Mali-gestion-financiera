@@ -5,19 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meli | Finanzas y Productividad</title>
     <link rel="stylesheet" href="style/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Navegación -->
     <nav class="navbar">
-        <div class="logo">Meli.</div>
-        <ul class="nav-links">
-            <li><a href="#finanzas">Finanzas</a></li>
-            <li><a href="#productividad">Productividad</a></li>
-            <li><a href="#about">Nosotros</a></li>
+        <div class="logo">Mali.</div>
+        
+        <!-- Ícono del Menú Hamburguesa -->
+        <div class="menu-toggle" id="mobile-menu">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+
+        <ul class="nav-links" id="nav-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="#quienessomos">¿Quienes Somos?</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#ayuda">Ayuda</a></li>
+            <!-- Botón Acceder que solo se verá dentro del menú en celulares -->
+            <li class="mobile-btn-container">
+                <a href="#registro" class="btn btn-primary">Acceder</a>
+            </li>
         </ul>
-        <a href="#registro" class="btn btn-outline">Acceder</a>
+        
+        <!-- Botón Acceder normal (solo escritorio) -->
+        <a href="#registro" class="btn btn-outline desktop-btn">Acceder</a>
     </nav>
 
+    <!-- Hero Section -->
     <header class="hero">
         <div class="hero-content">
             <h1 class="fade-in">Tu vida financiera y personal, <span>en perfecta sincronía.</span></h1>
@@ -28,6 +45,7 @@
         </div>
     </header>
 
+    <!-- Sección Bento Grid: Vista general -->
     <section id="features" class="bento-section">
         <div class="section-header fade-up">
             <h2>Un ecosistema completo</h2>
@@ -35,6 +53,7 @@
         </div>
         
         <div class="bento-grid">
+            <!-- Finanzas -->
             <div class="bento-card col-2 fade-up">
                 <div class="icon">📈</div>
                 <h3>Portafolio de Inversiones</h3>
@@ -46,6 +65,7 @@
                 <p>Categoriza tus movimientos, establece presupuestos mensuales y recibe alertas antes de exceder tus límites.</p>
             </div>
             
+            <!-- Productividad -->
             <div class="bento-card fade-up delay-2">
                 <div class="icon">🗓️</div>
                 <h3>Agenda Inteligente</h3>
@@ -59,6 +79,7 @@
         </div>
     </section>
 
+    <!-- Sección de Detalles a fondo -->
     <section class="deep-dive-section">
         <div class="dive-row fade-up" id="finanzas">
             <div class="dive-text">
@@ -89,17 +110,65 @@
         </div>
     </section>
 
+    <!-- Pre-Footer CTA -->
     <section class="cta-section fade-up" id="registro">
         <h2>¿Listo para tomar el control?</h2>
         <p>Únete a la plataforma que está redefiniendo cómo gestionamos nuestro tiempo y nuestro capital.</p>
         <a href="#registro" class="btn btn-primary">Crear mi cuenta en Meli</a>
     </section>
 
-    <footer id="about">
-        <div class="footer-content">
-            <div class="logo" style="margin-bottom: 1rem;">Meli.</div>
-            <p>Desarrollado y producido por <strong>CoreTech System</strong>.</p>
-            <a href="https://coretech-grd7.onrender.com/gnp-dashboard.html" target="_blank" class="footer-link">Ayuda y más información oficial</a>
+    <!-- Footer Profesional SaaS -->
+    <footer id="about" class="saas-footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                
+                <!-- Columna de Marca y Open Source -->
+                <div class="footer-brand">
+                    <div class="footer-logo">Meli<span style="color: var(--accent);">.</span></div>
+                    <p>El workspace definitivo que unifica tu gestión financiera y tu productividad diaria de manera instantanea.</p>
+                    <a href="https://github.com/PuleFeedSocial/Mali-gestion-financiera" target="_blank" class="github-badge">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                        </svg>
+                        Proyecto Open Source
+                    </a>
+                </div>
+
+                <!-- Columnas de Enlaces -->
+                <div class="footer-links">
+                    <div class="link-column">
+                        <h4>Plataforma</h4>
+                        <ul>
+                            <li><a href="index.html">Inicio</a></li>
+                            <li><a href="#quienessomos">¿Quienes Somos?</a></li>
+                            <li><a href="#servicios">Servicios</a></li>
+                            <li><a href="#ayuda">Ayuda</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-column">
+                        <h4>Recursos</h4>
+                        <ul>
+                            <li><a href="https://coretech-grd7.onrender.com/gnp-dashboard.html" target="_blank">Centro de Ayuda</a></li>
+                            <li><a href="https://github.com/PuleFeedSocial/Mali-gestion-financiera" target="_blank">Documentación (Repositorio)</a></li>
+                            <li><a href="#">Comunidad</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Términos de Servicio</a></li>
+                            <li><a href="#">Privacidad</a></li>
+                            <li><a href="#">Licencia MIT</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra Inferior de Copyright y Desarrollador -->
+            <div class="footer-bottom">
+                <p>&copy; 2026 Meli App. Todos los derechos reservados.</p>
+                <p class="developer-credit">Desarrollado y producido por <strong>CoreTech System</strong></p>
+            </div>
         </div>
     </footer>
 

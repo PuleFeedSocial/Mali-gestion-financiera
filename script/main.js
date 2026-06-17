@@ -34,4 +34,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // 3. Menú Hamburguesa para Móviles
+    const mobileMenu = document.getElementById('mobile-menu');
+    const navLinks = document.getElementById('nav-links');
+    const navItems = document.querySelectorAll('.nav-links a');
+
+    // Abrir/Cerrar menú al tocar el ícono
+    mobileMenu.addEventListener('click', () => {
+        mobileMenu.classList.toggle('is-active');
+        navLinks.classList.toggle('active');
+        
+        // Bloquear o desbloquear el scroll del body cuando el menú está abierto
+        if (navLinks.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+    });
+
+    // Cerrar el menú automáticamente cuando se hace clic en un enlace
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            mobileMenu.classList.remove('is-active');
+            navLinks.classList.remove('active');
+            document.body.style.overflow = 'auto'; // Restaurar el scroll
+        });
+    });
+
 });
