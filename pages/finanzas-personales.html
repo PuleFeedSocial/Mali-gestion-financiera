@@ -85,7 +85,29 @@
         .fp-header h1 {
             font-size: 2rem; font-weight: 700; letter-spacing: -1px;
         }
-        .fp-header .user-area { display: flex; align-items: center; gap: 0.8rem; }
+        .fp-header .user-area { display: flex; align-items: center; gap: 0.8rem; cursor: pointer; }
+        .fp-header .user-area .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .fp-header .user-area .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-muted); transition: transform 0.2s; margin-left: 0.3rem; }
+        .fp-header .user-area .user-dropdown.open .arrow { transform: rotate(180deg); }
+        .fp-header .user-area .user-dropdown .user-dropdown-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 0.5rem;
+            min-width: 200px; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+        .fp-header .user-area .user-dropdown.open .user-dropdown-menu { display: block; }
+        .fp-header .user-area .user-dropdown-menu a {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.6rem 0.8rem; color: var(--text-muted);
+            text-decoration: none; font-size: 0.85rem;
+            border-radius: 8px; transition: all 0.15s;
+        }
+        .fp-header .user-area .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+        .fp-header .user-area .user-dropdown-menu .divider { height: 1px; background: var(--border); margin: 0.3rem 0.5rem; }
+        .fp-header .user-area .user-dropdown-menu .logout-btn { color: #ff6b6b; }
+        .fp-header .user-area .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
         .fp-header .avatar {
             width: 38px; height: 38px; border-radius: 50%;
             background: var(--accent); color: var(--bg);
@@ -268,11 +290,17 @@
                 <div class="breadcrumb">💰 Finanzas / <span>Finanzas personales</span></div>
                 <h1>Finanzas Personales</h1>
             </div>
-            <div class="user-area" id="userArea">
-                <div class="avatar" id="userAvatar">M</div>
-                <div class="avatar-info">
-                    <div class="name" id="userName">Cargando...</div>
-                    <div class="role">Usuario</div>
+            <div class="user-area">
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="avatar" id="userAvatar">M</div>
+                    <span class="name" id="userName" style="font-size:0.9rem;font-weight:600;">Cargando...</span>
+                    <span class="arrow">▼</span>
+                    <div class="user-dropdown-menu">
+                        <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                        <a href="preferencias.html">🎨 Preferencias</a>
+                        <div class="divider"></div>
+                        <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -470,7 +498,15 @@
         } catch (e) { showMsg('Error: ' + e.message, 'error') }
     })
 
-    document.getElementById('userArea').addEventListener('click', () => { window.location.href = 'ajustes-cuenta.html' })
+    const dd = document.getElementById('userDropdown')
+    dd.addEventListener('click', (e) => {
+        if (e.target.closest('.user-dropdown-menu')) return
+        dd.classList.toggle('open')
+    })
+    document.addEventListener('click', (e) => {
+        if (!dd.contains(e.target)) dd.classList.remove('open')
+    })
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
     await cargarDatos()
 </script>
 </body>
