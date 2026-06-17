@@ -5,244 +5,219 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meli | Finanzas Personales</title>
     <link rel="stylesheet" href="../style/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #2d2d2a;
+            --surface: #1f1f1d;
+            --accent: #c7ef00;
+            --accent-secondary: #30605e;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
         .fp-wrapper { display: flex; min-height: 100vh; }
         .fp-sidebar {
-            width: 240px;
-            background-color: #1f1f1d;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            padding: 2rem 0;
-            flex-shrink: 0;
+            width: 240px; background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0; flex-shrink: 0;
         }
         .fp-sidebar .logo {
-            padding: 0 1.5rem;
-            margin-bottom: 2rem;
-            font-size: 1.4rem;
+            padding: 0 1.5rem; margin-bottom: 2rem;
+            font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px;
         }
+        .fp-sidebar .logo span { color: var(--accent); }
         .fp-sidebar nav a {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 0.7rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.7rem 1.5rem; color: var(--text-muted);
+            text-decoration: none; font-size: 0.9rem;
+            transition: all 0.2s; border-left: 3px solid transparent;
         }
-        .fp-sidebar nav a:hover {
-            color: var(--accent);
-            background: rgba(199,239,0,0.05);
-        }
-        .fp-sidebar nav a.active {
-            color: var(--accent);
-            border-left-color: var(--accent);
-            background: rgba(199,239,0,0.08);
-        }
+        .fp-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.04); }
+        .fp-sidebar nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(199,239,0,0.06); }
         .fp-sidebar .nav-label {
-            padding: 1rem 1.5rem 0.5rem;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.3);
-            font-weight: 600;
+            padding: 1rem 1.5rem 0.5rem; font-size: 0.65rem;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.25); font-weight: 600;
         }
-        .fp-sidebar nav a.sub {
-            padding-left: 3rem;
-            font-size: 0.85rem;
+        .fp-sidebar nav a.sub { padding-left: 3rem; font-size: 0.85rem; }
+
+        .fp-main {
+            flex: 1; padding: 2.5rem 3rem; overflow-y: auto;
+            max-height: 100vh;
         }
-        .fp-main { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
+
         .fp-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
         }
-        .fp-header h1 { font-size: 1.6rem; letter-spacing: -0.5px; }
         .fp-header .breadcrumb {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;
+            letter-spacing: 0.3px;
         }
         .fp-header .breadcrumb span { color: var(--accent); }
-        .balance-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2.5rem;
+        .fp-header h1 {
+            font-size: 2rem; font-weight: 700; letter-spacing: -1px;
         }
-        .balance-card {
-            background: var(--surface-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.08);
+        .fp-header .user-area { display: flex; align-items: center; gap: 0.8rem; }
+        .fp-header .avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: var(--accent); color: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.95rem; flex-shrink: 0;
         }
-        .balance-card .label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.3rem;
-        }
-        .balance-card .amount {
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: -1px;
-        }
-        .balance-card .amount.positive { color: var(--accent); }
-        .balance-card .amount.negative { color: #ff6b6b; }
-        .balance-card.ingresos { border-color: rgba(199,239,0,0.2); }
-        .balance-card.gastos { border-color: rgba(255,107,107,0.2); }
-        .balance-card.total { background: linear-gradient(145deg, #30605e, #244948); }
+        .fp-header .avatar-info { line-height: 1.3; }
+        .fp-header .avatar-info .name { font-size: 0.9rem; font-weight: 600; }
+        .fp-header .avatar-info .role { font-size: 0.75rem; color: var(--text-muted); }
 
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-grid {
+        .resumen-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        .resumen-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.4rem 1.6rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .resumen-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .resumen-card .label {
+            font-size: 0.75rem; color: var(--text-muted);
+            font-weight: 500; margin-bottom: 0.4rem;
+            letter-spacing: 0.3px;
+        }
+        .resumen-card .amount {
+            font-size: 2rem; font-weight: 700; letter-spacing: -1px;
+            color: var(--text);
+        }
+        .resumen-card.full {
+            grid-column: 1 / -1;
+            padding: 1.6rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .resumen-card.full .amount { font-size: 2.6rem; color: var(--accent); }
+        .resumen-card.full .label { font-size: 0.85rem; margin-bottom: 0; }
+
+        .add-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.6rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .add-section .section-title {
+            font-size: 0.95rem; font-weight: 600; margin-bottom: 1.2rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .add-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr 0.7fr auto;
             gap: 0.8rem;
             align-items: end;
         }
-        .form-grid .field { display: flex; flex-direction: column; gap: 0.3rem; }
-        .form-grid .field label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-weight: 500;
+        .add-grid .field { display: flex; flex-direction: column; gap: 0.3rem; }
+        .add-grid .field label {
+            font-size: 0.7rem; color: var(--text-muted);
+            font-weight: 500; letter-spacing: 0.3px;
         }
-        .form-grid select, .form-grid input {
+        .add-grid select, .add-grid input {
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            padding: 0.6rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
+            border: none; border-bottom: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.6rem 0.5rem;
+            font-size: 0.85rem; font-family: 'Inter', sans-serif;
+            outline: none; transition: border-color 0.2s;
+            border-radius: 0;
         }
-        .form-grid select:focus, .form-grid input:focus { border-color: var(--accent); }
-        .form-grid select option { background: #1f1f1d; color: white; }
-        .form-grid .day-field { display: none; }
-        .form-grid .day-field.visible { display: flex; }
+        .add-grid select:focus, .add-grid input:focus { border-bottom-color: var(--accent); }
+        .add-grid select option { background: var(--surface); color: var(--text); }
+        .add-grid .day-field { display: none; }
+        .add-grid .day-field.visible { display: flex; }
+        .add-grid .btn-submit {
+            background: var(--accent); color: var(--bg);
+            border: none; padding: 0.6rem 1.6rem;
+            border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .add-grid .btn-submit:hover { opacity: 0.85; transform: translateY(-1px); }
 
-        .add-section {
-            background: #1f1f1d;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2.5rem;
-            border: 1px solid rgba(255,255,255,0.05);
+        .mov-section .section-title {
+            font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
         }
-
-        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-        .user-dropdown .avatar {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: var(--accent); color: var(--bg-color);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.85rem;
-        }
-        .user-dropdown .name { font-size: 0.85rem; font-weight: 500; }
-        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; }
-        .user-dropdown.open .arrow { transform: rotate(180deg); }
-        .user-dropdown-menu {
-            position: absolute; top: calc(100% + 8px); right: 0;
-            background: #1f1f1d; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; padding: 0.5rem;
-            min-width: 200px; display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 200;
-        }
-        .user-dropdown.open .user-dropdown-menu { display: block; }
-        .user-dropdown-menu a {
-            display: flex; align-items: center; gap: 0.7rem;
-            padding: 0.6rem 0.8rem; color: var(--text-secondary);
-            text-decoration: none; font-size: 0.85rem;
-            border-radius: 8px; transition: all 0.15s;
-        }
-        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
-        .user-dropdown-menu .divider {
-            height: 1px; background: rgba(255,255,255,0.08); margin: 0.3rem 0.5rem;
-        }
-        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
-        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
-
         .table-wrap {
-            overflow-x: auto;
-            background: #1f1f1d;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
         }
-        table.movimientos {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
+        table.mov {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.85rem;
         }
-        table.movimientos th {
-            text-align: left;
-            padding: 1rem 1.2rem;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-weight: 600;
+        table.mov th {
+            text-align: left; padding: 1rem 1.2rem;
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
         }
-        table.movimientos td {
-            padding: 0.9rem 1.2rem;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+        table.mov td {
+            padding: 0.85rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
         }
-        table.movimientos tr:hover td { background: rgba(255,255,255,0.02); }
-        table.movimientos .monto { font-weight: 600; }
-        table.movimientos .monto.ingreso { color: var(--accent); }
-        table.movimientos .monto.gasto { color: #ff6b6b; }
-        table.movimientos .badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.08);
-            color: var(--text-secondary);
+        table.mov tr:last-child td { border-bottom: none; }
+        table.mov tr:hover td { background: rgba(255,255,255,0.02); }
+        table.mov .badge {
+            font-size: 0.65rem; padding: 0.2rem 0.55rem; border-radius: 4px;
+            font-weight: 600; letter-spacing: 0.3px;
         }
-        table.movimientos .badge.fijo { background: rgba(199,239,0,0.15); color: var(--accent); }
-        table.movimientos .badge.variable { background: rgba(255,107,107,0.15); color: #ff6b6b; }
-        table.movimientos .badge.hormiga { background: rgba(255,165,0,0.15); color: #ffa500; }
-        table.movimientos .badge.instantaneo { background: rgba(100,200,255,0.15); color: #64c8ff; }
-        table.movimientos .delete-btn {
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.2);
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 0.2rem;
+        table.mov .badge.fijo { background: rgba(199,239,0,0.12); color: var(--accent); }
+        table.mov .badge.variable { background: rgba(255,107,107,0.12); color: #ff6b6b; }
+        table.mov .badge.hormiga { background: rgba(255,165,0,0.12); color: #ffa500; }
+        table.mov .badge.instantaneo { background: rgba(100,200,255,0.12); color: #64c8ff; }
+        table.mov .monto { font-weight: 600; }
+        table.mov .monto.ing { color: var(--accent); }
+        table.mov .monto.gas { color: #ff6b6b; }
+        table.mov .del {
+            background: none; border: none; color: rgba(255,255,255,0.15);
+            cursor: pointer; font-size: 1rem; padding: 0.2rem;
             transition: color 0.2s;
         }
-        table.movimientos .delete-btn:hover { color: #ff6b6b; }
-
-        .msg {
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
-        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
-        .msg.success { display: block; background: rgba(199,239,0,0.15); border: 1px solid rgba(199,239,0,0.3); color: var(--accent); }
+        table.mov .del:hover { color: #ff6b6b; }
 
         .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
+            padding: 3.5rem 1rem; text-align: center;
         }
-        .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 1.2rem; opacity: 0.25; }
+        .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
 
+        .msg {
+            padding: 0.6rem 1rem; border-radius: 8px;
+            font-size: 0.85rem; margin-bottom: 1rem; display: none;
+        }
+        .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
+
+        @media (max-width: 1100px) {
+            .add-grid { grid-template-columns: 1fr 1fr; }
+        }
         @media (max-width: 768px) {
             .fp-sidebar { display: none; }
             .fp-main { padding: 1.5rem; }
-            .form-grid { grid-template-columns: 1fr; }
+            .resumen-grid { grid-template-columns: 1fr 1fr; }
+            .add-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -251,15 +226,14 @@
     <aside class="fp-sidebar">
         <div class="logo">Meli<span>.</span></div>
         <nav>
-            <div class="nav-label">Navegación</div>
-            <a href="dashboard.html">📊 Dashboard</a>
+            <div class="nav-label">General</div>
+            <a href="dashboard.html">📊 Panel principal</a>
             <div class="nav-label">Finanzas</div>
             <a href="finanzas-personales.html" class="active">💰 Finanzas personales</a>
             <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
             <a href="deudas.html">💳 Deudas</a>
             <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
             <a href="admin.html" id="adminLink" class="sub" style="display:none;">⚙️ Panel admin</a>
-
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;">⏱️ Gestión de Tiempo</a>
             <a href="#" style="opacity:0.4;">📁 Organización</a>
@@ -272,41 +246,35 @@
                 <div class="breadcrumb">💰 Finanzas / <span>Finanzas personales</span></div>
                 <h1>Finanzas Personales</h1>
             </div>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="avatar" id="userAvatar">M</div>
-                    <span class="name" id="userName">Cargando...</span>
-                    <span class="arrow">▼</span>
-                    <div class="user-dropdown-menu">
-                        <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
-                        <a href="preferencias.html">🎨 Preferencias</a>
-                        <div class="divider"></div>
-                        <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
-                    </div>
+            <div class="user-area" id="userArea">
+                <div class="avatar" id="userAvatar">M</div>
+                <div class="avatar-info">
+                    <div class="name" id="userName">Cargando...</div>
+                    <div class="role">Usuario</div>
                 </div>
             </div>
         </div>
 
         <div id="msg" class="msg"></div>
 
-        <div class="balance-grid" id="balanceGrid">
-            <div class="balance-card ingresos">
+        <div class="resumen-grid">
+            <div class="resumen-card">
                 <div class="label">💰 Ingresos totales</div>
-                <div class="amount positive" id="totalIngresos">$0.00</div>
+                <div class="amount" id="totalIngresos">$0.00</div>
             </div>
-            <div class="balance-card gastos">
+            <div class="resumen-card">
                 <div class="label">💸 Gastos totales</div>
-                <div class="amount negative" id="totalGastos">$0.00</div>
+                <div class="amount" id="totalGastos">$0.00</div>
             </div>
-            <div class="balance-card" style="border-color:rgba(199,239,0,0.15);">
+            <div class="resumen-card">
                 <div class="label">📄 Por cobrar</div>
-                <div class="amount positive" id="porCobrar">$0.00</div>
+                <div class="amount" id="porCobrar">$0.00</div>
             </div>
-            <div class="balance-card" style="border-color:rgba(255,107,107,0.15);">
+            <div class="resumen-card">
                 <div class="label">📄 Por pagar</div>
-                <div class="amount negative" id="porPagar">$0.00</div>
+                <div class="amount" id="porPagar">$0.00</div>
             </div>
-            <div class="balance-card total" style="grid-column:1/-1;">
+            <div class="resumen-card full">
                 <div class="label">⚖️ Balance total</div>
                 <div class="amount" id="totalBalance">$0.00</div>
             </div>
@@ -314,7 +282,7 @@
 
         <div class="add-section">
             <div class="section-title">➕ Registrar movimiento</div>
-            <div class="form-grid" id="addForm">
+            <div class="add-grid">
                 <div class="field">
                     <label>Tipo</label>
                     <select id="fTipo">
@@ -327,7 +295,7 @@
                     <select id="fSubtipo"></select>
                 </div>
                 <div class="field">
-                    <label>Monto ($)</label>
+                    <label>Monto</label>
                     <input type="number" id="fMonto" step="0.01" min="0.01" placeholder="0.00">
                 </div>
                 <div class="field">
@@ -342,32 +310,29 @@
                     <label>Día del mes</label>
                     <input type="number" id="fDia" min="1" max="31" placeholder="1-31">
                 </div>
-                <div class="field">
-                    <label>&nbsp;</label>
-                    <button class="btn btn-primary" id="addBtn" style="padding:0.6rem 1.5rem;font-size:0.9rem;">Agregar</button>
-                </div>
+                <button class="btn-submit" id="addBtn">Agregar</button>
             </div>
         </div>
 
-        <div class="section-title" id="movimientos">📋 Últimos movimientos</div>
-        <div class="table-wrap">
-            <table class="movimientos">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Subtipo</th>
-                        <th>Descripción</th>
-                        <th>Monto</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="movimientosBody">
-                </tbody>
-            </table>
-            <div class="empty-state" id="emptyState" style="display:none;">
-                <div class="icon">📭</div>
-                <p>Todavía no hay movimientos registrados.</p>
+        <div class="mov-section" id="movimientos">
+            <div class="section-title">📋 Últimos movimientos</div>
+            <div class="table-wrap">
+                <table class="mov">
+                    <thead>
+                        <tr><th>Fecha</th><th>Subtipo</th><th>Tipo</th><th>Descripción</th><th>Monto</th><th></th></tr>
+                    </thead>
+                    <tbody id="movBody"></tbody>
+                </table>
+                <div class="empty-state" id="emptyState">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="8" y="20" width="48" height="36" rx="3"/>
+                        <line x1="16" y1="30" x2="48" y2="30"/>
+                        <line x1="16" y1="38" x2="38" y2="38"/>
+                        <line x1="16" y1="46" x2="30" y2="46"/>
+                        <path d="M24 8 L40 8 L44 14 L48 8 L52 20 L32 20 L12 20 Z"/>
+                    </svg>
+                    <p>Todavía no hay movimientos registrados.</p>
+                </div>
             </div>
         </div>
     </main>
@@ -382,6 +347,7 @@
 
     const profile = await getUserProfile()
     if (profile) {
+        if (!profile.setup_complete) { window.location.href = 'setup.html'; throw new Error() }
         document.getElementById('userName').textContent = profile.name
         document.getElementById('userAvatar').textContent = profile.name.charAt(0).toUpperCase()
         if (profile.role === 'admin') {
@@ -390,21 +356,8 @@
         }
     }
 
-    const dd = document.getElementById('userDropdown')
-    dd.addEventListener('click', (e) => {
-        if (e.target.closest('.user-dropdown-menu')) return
-        dd.classList.toggle('open')
-    })
-    document.addEventListener('click', (e) => {
-        if (!dd.contains(e.target)) dd.classList.remove('open')
-    })
-
     const msg = document.getElementById('msg')
-    function showMsg(text, type) {
-        msg.textContent = text
-        msg.className = `msg ${type}`
-        setTimeout(() => { msg.className = 'msg' }, 4000)
-    }
+    function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 4000) }
 
     const subtipos = {
         ingreso: [{ v: 'fijo', t: 'Fijo' }, { v: 'instantaneo', t: 'Instantáneo' }],
@@ -429,11 +382,7 @@
         })
         toggleDayField()
     }
-
-    function toggleDayField() {
-        dayField.classList.toggle('visible', fSubtipo.value === 'fijo')
-    }
-
+    function toggleDayField() { dayField.classList.toggle('visible', fSubtipo.value === 'fijo') }
     fTipo.addEventListener('change', actualizarSubtipos)
     fSubtipo.addEventListener('change', toggleDayField)
     fFecha.value = new Date().toISOString().split('T')[0]
@@ -449,85 +398,56 @@
                 document.getElementById('porPagar').textContent = `$${balance.por_pagar.toFixed(2)}`
                 const bEl = document.getElementById('totalBalance')
                 bEl.textContent = `$${balance.balance.toFixed(2)}`
-                bEl.className = `amount ${balance.balance >= 0 ? 'positive' : 'negative'}`
             }
-
             await processScheduled()
-
             const movs = await getTransactions({ limit: 100 })
             renderMovimientos(movs)
-        } catch (e) {
-            showMsg('Error al cargar datos: ' + e.message, 'error')
-        }
+        } catch (e) { showMsg('Error al cargar datos.', 'error') }
     }
 
     function renderMovimientos(movs) {
-        const tbody = document.getElementById('movimientosBody')
+        const tbody = document.getElementById('movBody')
         const empty = document.getElementById('emptyState')
-
-        if (!movs || movs.length === 0) {
-            tbody.innerHTML = ''
-            empty.style.display = 'block'
-            return
-        }
-
+        if (!movs || movs.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return }
         empty.style.display = 'none'
         tbody.innerHTML = movs.map(m => {
             const fecha = new Date(m.date + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
             const signo = m.type === 'ingreso' ? '+' : '-'
-            const cls = m.type === 'ingreso' ? 'ingreso' : 'gasto'
+            const cls = m.type === 'ingreso' ? 'ing' : 'gas'
             return `<tr>
-                <td style="color:var(--text-secondary);font-size:0.85rem;">${fecha}</td>
+                <td style="color:var(--text-muted);font-size:0.8rem;">${fecha}</td>
                 <td><span class="badge ${m.subtype}">${m.subtype}</span></td>
-                <td style="color:var(--text-secondary);">${m.type === 'ingreso' ? '💰 Ingreso' : '💸 Gasto'}</td>
+                <td style="color:var(--text-muted);">${m.type === 'ingreso' ? '💰 Ingreso' : '💸 Gasto'}</td>
                 <td>${m.description}</td>
                 <td class="monto ${cls}">${signo}$${Number(m.amount).toFixed(2)}</td>
-                <td><button class="delete-btn" data-id="${m.id}" title="Eliminar">✕</button></td>
+                <td><button class="del" data-id="${m.id}" title="Eliminar">✕</button></td>
             </tr>`
         }).join('')
-
-        tbody.querySelectorAll('.delete-btn').forEach(btn => {
+        tbody.querySelectorAll('.del').forEach(btn => {
             btn.addEventListener('click', async () => {
                 if (!confirm('¿Eliminar este movimiento?')) return
-                try {
-                    await deleteTransaction(btn.dataset.id)
-                    showMsg('Movimiento eliminado.', 'success')
-                    await cargarDatos()
-                } catch (e) {
-                    showMsg('Error al eliminar.', 'error')
-                }
+                try { await deleteTransaction(btn.dataset.id); showMsg('Movimiento eliminado.', 'success'); await cargarDatos() }
+                catch (e) { showMsg('Error al eliminar.', 'error') }
             })
         })
     }
 
     document.getElementById('addBtn').addEventListener('click', async () => {
-        const tipo = fTipo.value
-        const subtype = fSubtipo.value
-        const amount = parseFloat(fMonto.value)
-        const description = fDesc.value.trim()
-        const date = fFecha.value
-        const dayOfMonth = subtype === 'fijo' ? parseInt(fDia.value) : null
-
+        const tipo = fTipo.value; const subtype = fSubtipo.value
+        const amount = parseFloat(fMonto.value); const description = fDesc.value.trim()
+        const date = fFecha.value; const dayOfMonth = subtype === 'fijo' ? parseInt(fDia.value) : null
         if (!amount || amount <= 0) { showMsg('Ingresá un monto válido.', 'error'); return }
         if (!description) { showMsg('Ingresá una descripción.', 'error'); return }
-        if (subtype === 'fijo' && (!dayOfMonth || dayOfMonth < 1 || dayOfMonth > 31)) {
-            showMsg('Ingresá un día del mes válido (1-31).', 'error'); return
-        }
-
+        if (subtype === 'fijo' && (!dayOfMonth || dayOfMonth < 1 || dayOfMonth > 31)) { showMsg('Día del mes inválido (1-31).', 'error'); return }
         try {
             await addTransaction({ type: tipo, subtype, amount, description, date, dayOfMonth })
             showMsg('Movimiento registrado.', 'success')
-            fMonto.value = ''; fDesc.value = ''
-            fFecha.value = new Date().toISOString().split('T')[0]
-            if (fDia) fDia.value = ''
+            fMonto.value = ''; fDesc.value = ''; fFecha.value = new Date().toISOString().split('T')[0]; if (fDia) fDia.value = ''
             await cargarDatos()
-        } catch (e) {
-            showMsg('Error: ' + e.message, 'error')
-        }
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
     })
 
-    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
-
+    document.getElementById('userArea').addEventListener('click', () => { window.location.href = 'ajustes-cuenta.html' })
     await cargarDatos()
 </script>
 </body>
