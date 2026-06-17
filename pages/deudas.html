@@ -307,6 +307,7 @@
     document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
 
+    const fm = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const msg = document.getElementById('dMsg')
     function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 3500) }
 
@@ -315,8 +316,8 @@
     async function cargarResumen() {
         const balance = await getBalance()
         if (balance) {
-            document.getElementById('porCobrar').textContent = `$${balance.por_cobrar.toFixed(2)}`
-            document.getElementById('porPagar').textContent = `$${balance.por_pagar.toFixed(2)}`
+            document.getElementById('porCobrar').textContent = `$${fm(balance.por_cobrar)}`
+            document.getElementById('porPagar').textContent = `$${fm(balance.por_pagar)}`
         }
     }
 
@@ -371,7 +372,7 @@
                 <td>${d.type === 'por_cobrar' ? '💰 Cobrar' : '💸 Pagar'}</td>
                 <td>${d.debtor}</td>
                 <td style="color:var(--text-secondary);font-size:0.8rem;">${d.description || '-'}</td>
-                <td class="monto ${cls}">${signo}$${Number(d.amount).toFixed(2)}</td>
+                <td class="monto ${cls}">${signo}$${fm(d.amount)}</td>
                 <td><span class="badge ${estadoCls}">${estadoTxt}</span></td>
                 <td>${acciones}</td>
             </tr>`

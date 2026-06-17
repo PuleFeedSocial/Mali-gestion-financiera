@@ -377,6 +377,7 @@
         }
     }
 
+    const fm = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const msg = document.getElementById('msg')
     function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 4000) }
 
@@ -413,12 +414,12 @@
         try {
             const balance = await getBalance()
             if (balance) {
-                document.getElementById('totalIngresos').textContent = `$${balance.ingresos.toFixed(2)}`
-                document.getElementById('totalGastos').textContent = `$${balance.gastos.toFixed(2)}`
-                document.getElementById('porCobrar').textContent = `$${balance.por_cobrar.toFixed(2)}`
-                document.getElementById('porPagar').textContent = `$${balance.por_pagar.toFixed(2)}`
+                document.getElementById('totalIngresos').textContent = `$${fm(balance.ingresos)}`
+                document.getElementById('totalGastos').textContent = `$${fm(balance.gastos)}`
+                document.getElementById('porCobrar').textContent = `$${fm(balance.por_cobrar)}`
+                document.getElementById('porPagar').textContent = `$${fm(balance.por_pagar)}`
                 const bEl = document.getElementById('totalBalance')
-                bEl.textContent = `$${balance.balance.toFixed(2)}`
+                bEl.textContent = `$${fm(balance.balance)}`
             }
             await processScheduled()
             const movs = await getTransactions({ limit: 100 })
@@ -440,7 +441,7 @@
                 <td><span class="badge ${m.subtype}">${m.subtype}</span></td>
                 <td style="color:var(--text-muted);">${m.type === 'ingreso' ? '💰 Ingreso' : '💸 Gasto'}</td>
                 <td>${m.description}</td>
-                <td class="monto ${cls}">${signo}$${Number(m.amount).toFixed(2)}</td>
+                <td class="monto ${cls}">${signo}$${fm(m.amount)}</td>
                 <td><button class="del" data-id="${m.id}" title="Eliminar">✕</button></td>
             </tr>`
         }).join('')
