@@ -1,5 +1,5 @@
 /* =========================================
-   1. Variables y Reset
+   1. Variables y Reset Global
    ========================================= */
 :root {
     --bg-color: #2d2d2a;       
@@ -24,22 +24,62 @@ body {
     overflow-x: hidden;
 }
 
+/* =========================================
+   2. Componentes Generales (Botones y Logo)
+   ========================================= */
 .logo {
-    font-size: 1.8rem; /* Tamaño grande y moderno */
-    font-weight: 800; /* Letra bien gruesa para dar peso a la marca */
-    color: var(--text-primary); /* Color blanco */
-    letter-spacing: -1.5px; /* Letras un poco más juntas (efecto premium) */
-    z-index: 101; /* IMPORTANTE: Asegura que el logo se vea por encima del menú móvil oscuro */
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -1.5px;
+    z-index: 101;
     position: relative;
     cursor: pointer;
 }
 
-/* Le da el color verde lima brillante únicamente al punto */
 .logo span {
     color: var(--accent);
 }
+
+.btn {
+    padding: 0.8rem 2.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    color: var(--bg-color); 
+    box-shadow: 0 4px 20px rgba(199, 239, 0, 0.25);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(199, 239, 0, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.5rem 1.5rem;
+}
+
+.btn-outline:hover {
+    background: var(--accent);
+    color: var(--bg-color); 
+}
+
 /* =========================================
-   2. Navegación, Botones y Menú Hamburguesa
+   3. Navegación y Menú Hamburguesa
    ========================================= */
 .navbar {
     display: flex;
@@ -73,41 +113,6 @@ body {
     color: var(--accent);
 }
 
-.btn {
-    padding: 0.8rem 2.5rem;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    display: inline-block;
-    text-align: center;
-}
-
-.btn-primary {
-    background-color: var(--accent);
-    color: var(--bg-color); 
-    box-shadow: 0 4px 20px rgba(199, 239, 0, 0.25);
-}
-
-.btn-primary:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(199, 239, 0, 0.4);
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 0.5rem 1.5rem;
-}
-
-.btn-outline:hover {
-    background: var(--accent);
-    color: var(--bg-color); 
-}
-
 .menu-toggle {
     display: none;
     flex-direction: column;
@@ -129,7 +134,7 @@ body {
 .desktop-btn { display: inline-block; }
 
 /* =========================================
-   3. Secciones Principales
+   4. Landing Page: Secciones Principales
    ========================================= */
 .hero {
     height: 100vh;
@@ -174,9 +179,7 @@ body {
 
 .section-header p { color: var(--text-secondary); }
 
-/* =========================================
-   4. Bento Grid
-   ========================================= */
+/* Bento Grid */
 .bento-section {
     padding: 6rem 5%;
     max-width: 1200px;
@@ -225,9 +228,7 @@ body {
     font-size: 0.95rem;
 }
 
-/* =========================================
-   5. Deep Dive (Detalles) & CTA
-   ========================================= */
+/* Deep Dive & CTA */
 .deep-dive-section {
     padding: 4rem 5%;
     max-width: 1200px;
@@ -300,10 +301,10 @@ body {
 }
 
 /* =========================================
-   6. Footer SaaS Profesional
+   5. Footer SaaS
    ========================================= */
 .saas-footer {
-    background-color: #1f1f1d; /* Un tono ligerísimamente distinto para separar */
+    background-color: #1f1f1d;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding: 5rem 5% 2rem 5%;
     color: var(--text-secondary);
@@ -328,21 +329,12 @@ body {
     max-width: 350px;
 }
 
-.footer-logo {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    letter-spacing: -1px;
-}
-
 .footer-brand p {
     font-size: 0.95rem;
     margin-bottom: 1.5rem;
     line-height: 1.6;
 }
 
-/* Badge Open Source GitHub */
 .github-badge {
     display: inline-flex;
     align-items: center;
@@ -377,14 +369,8 @@ body {
     font-weight: 600;
 }
 
-.link-column ul {
-    list-style: none;
-}
-
-.link-column ul li {
-    margin-bottom: 0.8rem;
-}
-
+.link-column ul { list-style: none; }
+.link-column ul li { margin-bottom: 0.8rem; }
 .link-column ul li a {
     color: var(--text-secondary);
     text-decoration: none;
@@ -392,9 +378,7 @@ body {
     transition: color 0.3s ease;
 }
 
-.link-column ul li a:hover {
-    color: var(--accent);
-}
+.link-column ul li a:hover { color: var(--accent); }
 
 .footer-bottom {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -413,6 +397,253 @@ body {
 }
 
 /* =========================================
+   6. Página de Acceso / Registro
+   ========================================= */
+.access-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.back-home {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+    z-index: 100;
+}
+
+.back-home:hover { color: var(--accent); }
+
+.access-container {
+    background-color: #1f1f1d;
+    border-radius: 20px;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.5), 0 10px 10px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+    width: 900px;
+    max-width: 100%;
+    min-height: 680px; /* Altura corregida para que respire el formulario */
+}
+
+.access-container h1 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+    letter-spacing: -1px;
+}
+
+.access-container p {
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.6;
+    margin: 20px 0 30px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.access-container span {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    display: inline-block;
+}
+
+.access-container a.forgot-password {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin: 1rem 0 1.5rem;
+    transition: color 0.3s ease;
+    display: inline-block;
+}
+
+.access-container a.forgot-password:hover { color: var(--accent); }
+
+.access-container form {
+    background-color: #1f1f1d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 50px;
+    height: 100%;
+    text-align: center;
+}
+
+.access-container input:not([type="checkbox"]) {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    padding: 14px 15px;
+    margin: 10px 0;
+    width: 100%;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.access-container input:focus { border-color: var(--accent); }
+
+.access-container form .btn-primary { margin-top: 15px; }
+
+/* Contenedor y diseño del Checkbox */
+.access-container .checkbox-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin: 15px 0 25px 0;
+}
+
+.access-container .checkbox-container input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: pointer;
+    accent-color: var(--accent);
+}
+
+.access-container .checkbox-container label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin: 0;
+    line-height: 1;
+}
+
+.access-container .checkbox-container label a {
+    color: var(--accent) !important;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.access-container .checkbox-container label a:hover {
+    color: var(--text-primary) !important;
+    text-decoration: underline;
+}
+
+/* Redes Sociales Formulario */
+.access-container .social-container {
+    margin: 1.5rem 0 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.access-container .social {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 5px;
+    height: 40px;
+    width: 40px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.access-container .social:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background-color: rgba(199, 239, 0, 0.1);
+}
+
+.access-container .form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+}
+
+.access-container .sign-in-container { left: 0; width: 50%; z-index: 2; }
+.access-container .sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
+
+.access-container.right-panel-active .sign-in-container { transform: translateX(100%); }
+.access-container.right-panel-active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; animation: show 0.6s; }
+
+@keyframes show {
+    0%, 49.99% { opacity: 0; z-index: 1; }
+    50%, 100% { opacity: 1; z-index: 5; }
+}
+
+/* Overlay Sliding Panel */
+.access-container .overlay-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 100;
+}
+
+.access-container.right-panel-active .overlay-container { transform: translateX(-100%); }
+
+.access-container .overlay {
+    background: var(--surface-color);
+    background: linear-gradient(to right, #244948, var(--surface-color));
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 0 0;
+    color: #ffffff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+}
+
+.access-container.right-panel-active .overlay { transform: translateX(50%); }
+
+.access-container .overlay-panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    text-align: center;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+}
+
+.access-container .overlay-left { transform: translateX(-20%); }
+.access-container.right-panel-active .overlay-left { transform: translateX(0); }
+.access-container .overlay-right { right: 0; transform: translateX(0); }
+.access-container.right-panel-active .overlay-right { transform: translateX(20%); }
+
+/* Ajustes Móviles y Logos */
+.access-container .logo-mini {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+    display: none; 
+}
+.access-container .logo-mini span { color: var(--accent); }
+.access-container .mobile-toggle { display: none; }
+
+/* =========================================
    7. Clases de Animación JS
    ========================================= */
 .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
@@ -424,6 +655,7 @@ body {
 /* =========================================
    8. Diseño Responsive
    ========================================= */
+
 /* Tablets (hasta 992px) */
 @media (max-width: 992px) {
     .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); }
@@ -435,6 +667,7 @@ body {
 
 /* Celulares (hasta 768px) */
 @media (max-width: 768px) {
+    /* Navbar & Menú */
     .navbar { padding: 1rem 5%; flex-wrap: nowrap; }
     .desktop-btn { display: none; }
     .mobile-btn-container { display: block; margin-top: 2rem; }
@@ -456,6 +689,7 @@ body {
     .menu-toggle.is-active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); background-color: var(--accent); }
     .menu-toggle.is-active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); background-color: var(--accent); }
 
+    /* Secciones Landing Page */
     .hero { padding-top: 6rem; height: auto; min-height: 100vh; }
     .hero h1 { font-size: 2.2rem; margin-bottom: 1.5rem; }
     .hero p { font-size: 1rem; }
@@ -475,8 +709,48 @@ body {
     .mobile-btn-container .btn { display: inline-block; width: auto; padding: 1rem 3rem; font-size: 1.1rem; }
     .cta-buttons .btn { display: block; width: 100%; margin-bottom: 1rem; }
 
-    /* Ajustes Responsive Footer */
+    /* Footer */
     .footer-top { flex-direction: column; gap: 2.5rem; }
     .footer-links { gap: 2.5rem; flex-direction: column; }
     .footer-bottom { flex-direction: column; text-align: center; gap: 1.5rem; }
+
+    /* Formulario de Acceso y Registro */
+    .access-wrapper { padding: 2rem; align-items: flex-start; }
+    .back-home { top: 1rem; left: 1rem; font-size: 0.9rem; }
+    
+    .access-container {
+        min-height: 720px;
+        width: 100%;
+        margin-top: 3rem;
+    }
+    .access-container .overlay-container { display: none; }
+    .access-container .sign-in-container, 
+    .access-container .sign-up-container { width: 100%; left: 0; }
+    .access-container form { padding: 0 30px; }
+    .access-container .logo-mini { display: block; }
+    
+    .access-container .mobile-toggle {
+        display: block;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .access-container .mobile-toggle a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+    .access-container.right-panel-active .sign-in-container { transform: translateX(0); opacity: 0; z-index: 1; }
+    .access-container.right-panel-active .sign-up-container { transform: translateX(0); opacity: 1; z-index: 5; }
+}
+
+/* Celulares Pequeños (Hasta 480px) */
+@media (max-width: 480px) {
+    /* Evita que los formularios se aplasten en pantallas muy angostas */
+    .access-container form {
+        padding: 0 20px; 
+    }
+    .access-container h1 {
+        font-size: 1.6rem;
+    }
+    .access-container .checkbox-container label {
+        font-size: 0.75rem; /* Ajuste para que los términos quepan sin problemas */
+    }
 }

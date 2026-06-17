@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meli | Acceso y Registro</title>
+    <!-- Vinculas a tu UNICO archivo CSS -->
+    <link rel="stylesheet" href="../style/style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Este Wrapper envuelve todo para centrarlo -->
+    <div class="access-wrapper">
+        <a href="../index.html" class="back-home"><span>←</span> Volver al inicio</a>
+
+        <div class="access-container" id="access-container">
+            
+           <!-- Panel Izquierdo (Registro) -->
+            <div class="form-container sign-up-container">
+                <form action="dashboard.html">
+                    <div class="logo-mini">Meli<span>.</span></div>
+                    <h1>Crear Cuenta</h1>
+                    <div class="social-container">
+                        <a href="#" class="social">G</a>
+                    </div>
+                    <span>o usa tu cuenta de Google para registrarte</span>
+                    
+                    <input type="text" placeholder="Nombre completo" required />
+                    <input type="email" placeholder="Correo electrónico" required />
+                    <input type="password" placeholder="Contraseña" required />
+                    <input type="password" placeholder="Ingresa nuevamente la contraseña" required />
+
+                    <!-- NUEVO: Checkbox de Términos y Condiciones -->
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="terms" required />
+                        <label for="terms">Acepto los <a href="terminos.html" target="_blank">términos y condiciones</a></label>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">Registrarse</button>
+                    <p class="mobile-toggle">¿Ya tienes cuenta? <a href="#" id="signInMobile">Inicia sesión</a></p>
+                </form>
+            </div>
+
+            <!-- Panel Derecho (Login) -->
+            <div class="form-container sign-in-container">
+                <form action="dashboard.html">
+                    <div class="logo-mini">Meli<span>.</span></div>
+                    <h1>Iniciar Sesión</h1>
+                    <div class="social-container">
+                        <a href="#" class="social">G</a>
+                    </div>
+                    <span>o usa tu cuenta de Google</span>
+                    <input type="email" placeholder="Correo electrónico" required />
+                    <input type="password" placeholder="Contraseña" required />
+                    <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                    <button class="btn btn-primary">Acceder</button>
+                    <p class="mobile-toggle">¿No tienes cuenta? <a href="#" id="signUpMobile">Regístrate</a></p>
+                </form>
+            </div>
+
+            <!-- El Panel Overlay Deslizante -->
+            <div class="overlay-container">
+                <div class="overlay">
+                    <div class="overlay-panel overlay-left">
+                        <h1>¡Bienvenido de nuevo!</h1>
+                        <p>Para mantenerte conectado con nosotros, inicia sesión con tu información personal.</p>
+                        <button class="btn btn-outline" id="signIn">Iniciar Sesión</button>
+                    </div>
+                    <div class="overlay-panel overlay-right">
+                        <h1>¡Hola, Amigo!</h1>
+                        <p>Ingresa tus datos personales y comienza a organizar tus finanzas y tu tiempo hoy mismo.</p>
+                        <button class="btn btn-outline" id="signUp">Registrarse</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script Actualizado -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const signUpButton = document.getElementById('signUp');
+            const signInButton = document.getElementById('signIn');
+            const container = document.getElementById('access-container'); // <--- ID Actualizado
+
+            const signUpMobile = document.getElementById('signUpMobile');
+            const signInMobile = document.getElementById('signInMobile');
+
+            signUpButton.addEventListener('click', () => {
+                container.classList.add("right-panel-active");
+            });
+
+            signInButton.addEventListener('click', () => {
+                container.classList.remove("right-panel-active");
+            });
+
+            signUpMobile.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                container.classList.add("right-panel-active");
+            });
+
+            signInMobile.addEventListener('click', (e) => {
+                e.preventDefault();
+                container.classList.remove("right-panel-active");
+            });
+        });
+    </script>
+</body>
+</html>
