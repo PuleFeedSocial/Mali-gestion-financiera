@@ -3,113 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meli | Dashboard</title>
+    <title>Mali | Dashboard</title>
     <link rel="stylesheet" href="../style/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --surface: #1f1f1d;
+            --border: rgba(255,255,255,0.08);
+            --radius: 16px;
+        }
         .dash-wrapper { display: flex; min-height: 100vh; }
         .dash-sidebar {
-            width: 240px;
-            background-color: #1f1f1d;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            padding: 2rem 0;
-            flex-shrink: 0;
+            width: 240px; background: var(--bg-color);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0; flex-shrink: 0;
         }
         .dash-sidebar .logo {
-            padding: 0 1.5rem;
-            margin-bottom: 2rem;
-            font-size: 1.4rem;
+            padding: 0 1.5rem; margin-bottom: 2rem;
+            font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px;
         }
         .dash-sidebar .logo span { color: var(--accent); }
         .dash-sidebar nav a {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 0.7rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
+            display: flex; align-items: center; gap: 12px;
+            padding: 0.65rem 1.5rem; color: var(--text-secondary);
+            text-decoration: none; font-size: 0.9rem;
+            transition: all 0.2s; border-radius: 8px; margin: 0 0.5rem;
         }
-        .dash-sidebar nav a:hover {
-            color: var(--accent);
-            background: rgba(199,239,0,0.05);
-        }
+        .dash-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.08); }
         .dash-sidebar nav a.active {
-            color: var(--accent);
-            border-left-color: var(--accent);
-            background: rgba(199,239,0,0.08);
+            color: var(--accent); background: rgba(199,239,0,0.1);
+            font-weight: 500;
         }
         .dash-sidebar .nav-label {
-            padding: 1rem 1.5rem 0.5rem;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.3);
-            font-weight: 600;
+            padding: 1.2rem 1.5rem 0.4rem; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: rgba(255,255,255,0.5); font-weight: 600;
         }
+        .dash-sidebar .nav-group { position: relative; }
+        .dash-sidebar .nav-group::before {
+            content: ''; position: absolute; left: 2.3rem;
+            top: 2.2rem; bottom: 0.8rem;
+            width: 1px; background: var(--border);
+        }
+        .dash-sidebar .nav-group:last-of-type::before { bottom: 50%; }
         .dash-sidebar nav a.sub {
-            padding-left: 3rem;
-            font-size: 0.85rem;
+            padding-left: 3.2rem; font-size: 0.85rem;
+            position: relative;
         }
-        .dash-main { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
-        .dash-main h1 { font-size: 1.6rem; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
-        .dash-main .subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
+        .dash-sidebar nav a.sub::before {
+            content: ''; position: absolute; left: -0.9rem; top: 50%;
+            width: 0.7rem; height: 1px; background: var(--border);
+        }
+        .dash-main { flex: 1; padding: 2.5rem 3rem; overflow-y: auto; max-height: 100vh; }
+        .dash-main h1 { font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
+        .dash-main .subtitle { color: var(--text-secondary); margin-bottom: 2.5rem; font-size: 0.95rem; }
 
         .dash-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
         }
-
-        .welcome-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .welcome-card {
-            background: var(--surface-color);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: transform 0.2s, border-color 0.2s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .welcome-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent);
-        }
-        .welcome-card .icon { font-size: 2.2rem; margin-bottom: 0.8rem; }
-        .welcome-card h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
-        .welcome-card p { color: var(--text-secondary); font-size: 0.85rem; }
-        .welcome-card .status {
-            display: inline-block;
-            margin-top: 0.8rem;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-        .welcome-card .status.active { color: var(--accent); }
-        .welcome-card .status.inactive { color: rgba(255,255,255,0.3); }
+        .dash-header .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; letter-spacing: 0.3px; }
+        .dash-header .breadcrumb span { color: var(--accent); }
+        .dash-header .user-area { display: flex; align-items: center; gap: 0.8rem; }
 
         .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
         .user-dropdown .avatar {
-            width: 34px; height: 34px; border-radius: 50%;
+            width: 38px; height: 38px; border-radius: 50%;
             background: var(--accent); color: var(--bg-color);
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.85rem;
+            font-weight: 700; font-size: 0.95rem;
         }
-        .user-dropdown .name { font-size: 0.85rem; font-weight: 500; }
-        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; }
+        .user-dropdown .name { font-size: 0.9rem; font-weight: 600; }
+        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; margin-left: 0.3rem; }
         .user-dropdown.open .arrow { transform: rotate(180deg); }
         .user-dropdown-menu {
             position: absolute; top: calc(100% + 8px); right: 0;
@@ -133,28 +98,64 @@
         .user-dropdown-menu .logout-btn { color: #ff6b6b; }
         .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
 
+        .welcome-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+        }
+        .welcome-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.8rem 2rem;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .welcome-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.15);
+        }
+        .welcome-card .icon { font-size: 2rem; margin-bottom: 0.8rem; }
+        .welcome-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .welcome-card p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+        .welcome-card .status {
+            display: inline-block; margin-top: 1rem;
+            font-size: 0.65rem; text-transform: uppercase;
+            letter-spacing: 1px; font-weight: 600;
+        }
+        .welcome-card .status.active { color: var(--accent); }
+        .welcome-card .status.inactive { color: rgba(255,255,255,0.25); }
+
         @media (max-width: 768px) {
             .dash-sidebar { display: none; }
             .dash-main { padding: 1.5rem; }
+            .welcome-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 <div class="dash-wrapper">
     <aside class="dash-sidebar">
-        <div class="logo">Meli<span>.</span></div>
+        <div class="logo">Mali<span>.</span></div>
         <nav>
             <div class="nav-label">General</div>
             <a href="dashboard.html" class="active">📊 Panel principal</a>
 
             <div class="nav-label">Finanzas</div>
-            <a href="finanzas-personales.html">💰 Finanzas personales</a>
-            <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            <div class="nav-group">
+                <a href="finanzas-personales.html">💰 Finanzas personales</a>
+                <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            </div>
             <a href="deudas.html">💳 Deudas</a>
             <a href="#" style="opacity:0.4;pointer-events:none;">📈 Inversiones</a>
 
             <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
-            <a href="admin.html" id="adminLink" class="sub" style="display:none;">⚙️ Panel admin</a>
+            <div class="nav-group" id="adminGroup" style="display:none;">
+                <a href="admin.html" id="adminLink" class="sub">⚙️ Panel admin</a>
+            </div>
 
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
@@ -165,10 +166,10 @@
     <main class="dash-main">
         <div class="dash-header">
             <div>
-                <div style="color:var(--text-secondary);font-size:0.85rem;">📊 <span style="color:var(--accent);">Panel principal</span></div>
-                <h1>Bienvenido a Meli</h1>
+                <div class="breadcrumb">📊 <span>Panel principal</span></div>
+                <h1>Bienvenido a Mali</h1>
             </div>
-            <div style="display:flex;align-items:center;gap:1rem;">
+            <div class="user-area">
                 <div class="user-dropdown" id="userDropdown">
                     <div class="avatar" id="userAvatar">M</div>
                     <span class="name" id="userName">Cargando...</span>
@@ -184,6 +185,8 @@
         </div>
 
         <p class="subtitle">Todo lo que necesitás para gestionar tus finanzas, tiempo y proyectos en un solo lugar.</p>
+
+        <div class="dash-section-label" style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;letter-spacing:0.5px;margin-bottom:1rem;">MÓDULOS DISPONIBLES</div>
 
         <div class="welcome-grid">
             <a href="finanzas-personales.html" class="welcome-card">

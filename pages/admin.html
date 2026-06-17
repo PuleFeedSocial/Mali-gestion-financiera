@@ -3,60 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meli | Admin</title>
+    <title>Mali | Admin</title>
     <link rel="stylesheet" href="../style/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; }
+        :root {
+            --surface: #1f1f1d;
+            --border: rgba(255,255,255,0.08);
+            --radius: 16px;
+        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-primary); }
         .admin-wrapper { display: flex; min-height: 100vh; }
         .admin-sidebar {
-            width: 240px;
-            background-color: #1f1f1d;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            padding: 2rem 0;
-            flex-shrink: 0;
+            width: 240px; background: var(--bg-color);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0; flex-shrink: 0;
         }
-        .admin-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; }
+        .admin-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px; }
         .admin-sidebar .logo span { color: var(--accent); }
         .admin-sidebar nav a {
-            display: flex; align-items: center; gap: 0.7rem;
-            padding: 0.7rem 1.5rem; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 12px;
+            padding: 0.65rem 1.5rem; color: var(--text-secondary);
             text-decoration: none; font-size: 0.9rem;
-            transition: all 0.2s; border-left: 3px solid transparent;
+            transition: all 0.2s; border-radius: 8px; margin: 0 0.5rem;
         }
-        .admin-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.05); }
-        .admin-sidebar nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(199,239,0,0.08); }
+        .admin-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.08); }
+        .admin-sidebar nav a.active { color: var(--accent); background: rgba(199,239,0,0.1); font-weight: 500; }
         .admin-sidebar .nav-label {
-            padding: 1rem 1.5rem 0.5rem; font-size: 0.7rem;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.3); font-weight: 600;
+            padding: 1.2rem 1.5rem 0.4rem; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: rgba(255,255,255,0.5); font-weight: 600;
         }
-        .admin-sidebar nav a.sub { padding-left: 3rem; font-size: 0.85rem; }
+        .admin-sidebar .nav-group { position: relative; }
+        .admin-sidebar .nav-group::before {
+            content: ''; position: absolute; left: 2.3rem;
+            top: 2.2rem; bottom: 0.8rem;
+            width: 1px; background: var(--border);
+        }
+        .admin-sidebar .nav-group:last-of-type::before { bottom: 50%; }
+        .admin-sidebar nav a.sub {
+            padding-left: 3.2rem; font-size: 0.85rem;
+            position: relative;
+        }
+        .admin-sidebar nav a.sub::before {
+            content: ''; position: absolute; left: -0.9rem; top: 50%;
+            width: 0.7rem; height: 1px; background: var(--border);
+        }
 
-        .admin-main { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
-        .admin-main h1 { font-size: 1.6rem; letter-spacing: -0.5px; margin-bottom: 0.3rem; }
+        .admin-main { flex: 1; padding: 2.5rem 3rem; overflow-y: auto; max-height: 100vh; }
+        .admin-main h1 { font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.3rem; }
         .admin-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
         }
+        .admin-header .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; letter-spacing: 0.3px; }
+        .admin-header .breadcrumb span { color: var(--accent); }
 
         .section-card {
-            background: #1f1f1d;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 1.6rem 2rem;
             margin-bottom: 2rem;
         }
         .section-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .table-wrap { overflow-x: auto; }
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
         table.admin-table {
             width: 100%;
             border-collapse: collapse;
@@ -64,25 +88,25 @@
         }
         table.admin-table th {
             text-align: left;
-            padding: 0.8rem 1rem;
+            padding: 1rem 1.2rem;
             font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
             font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
         }
         table.admin-table td {
-            padding: 0.7rem 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+            padding: 0.85rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
         }
+        table.admin-table tr:last-child td { border-bottom: none; }
         table.admin-table tr:hover td { background: rgba(255,255,255,0.02); }
         table.admin-table .badge-role {
-            font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 4px;
-            font-weight: 600;
+            font-size: 0.65rem; padding: 0.2rem 0.55rem; border-radius: 4px;
+            font-weight: 600; letter-spacing: 0.3px;
         }
-        table.admin-table .badge-role.admin { background: rgba(199,239,0,0.15); color: var(--accent); }
-        table.admin-table .badge-role.user { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+        table.admin-table .badge-role.admin { background: rgba(199,239,0,0.12); color: var(--accent); }
+        table.admin-table .badge-role.user { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
         table.admin-table .badge-code {
             font-family: monospace;
             font-size: 0.9rem;
@@ -94,7 +118,7 @@
         .small-btn {
             padding: 0.3rem 0.8rem;
             border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid var(--border);
             background: transparent;
             color: var(--text-secondary);
             cursor: pointer;
@@ -109,17 +133,23 @@
             flex-wrap: wrap;
         }
         .gen-row .field { display: flex; flex-direction: column; gap: 0.3rem; }
-        .gen-row .field label { font-size: 0.75rem; color: var(--text-secondary); }
-        .gen-row input, .gen-row select {
+        .gen-row .field label { font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.3px; }
+        .gen-row input {
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: none; border-bottom: 1px solid var(--border);
             color: var(--text-primary);
-            padding: 0.5rem 0.8rem;
-            border-radius: 8px;
+            padding: 0.5rem 0.5rem;
             font-size: 0.85rem;
-            outline: none;
+            outline: none; font-family: 'Inter', sans-serif;
         }
-        .gen-row input:focus { border-color: var(--accent); }
+        .gen-row input:focus { border-bottom-color: var(--accent); }
+        .gen-row .btn-gen {
+            background: var(--accent); color: var(--bg-color);
+            border: none; padding: 0.5rem 1.4rem;
+            border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .gen-row .btn-gen:hover { opacity: 0.85; transform: translateY(-1px); }
 
         .msg {
             padding: 0.6rem 1rem;
@@ -128,22 +158,22 @@
             margin-bottom: 1rem;
             display: none;
         }
-        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
-        .msg.success { display: block; background: rgba(199,239,0,0.15); border: 1px solid rgba(199,239,0,0.3); color: var(--accent); }
+        .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
 
         .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
         .user-dropdown .avatar {
-            width: 34px; height: 34px; border-radius: 50%;
+            width: 38px; height: 38px; border-radius: 50%;
             background: var(--accent); color: var(--bg-color);
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.85rem;
+            font-weight: 700; font-size: 0.95rem;
         }
-        .user-dropdown .name { font-size: 0.85rem; font-weight: 500; }
-        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; }
+        .user-dropdown .name { font-size: 0.9rem; font-weight: 600; }
+        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; margin-left: 0.3rem; }
         .user-dropdown.open .arrow { transform: rotate(180deg); }
         .user-dropdown-menu {
             position: absolute; top: calc(100% + 8px); right: 0;
-            background: #1f1f1d; border: 1px solid rgba(255,255,255,0.1);
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px; padding: 0.5rem;
             min-width: 200px; display: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -158,7 +188,7 @@
         }
         .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
         .user-dropdown-menu .divider {
-            height: 1px; background: rgba(255,255,255,0.08); margin: 0.3rem 0.5rem;
+            height: 1px; background: var(--border); margin: 0.3rem 0.5rem;
         }
         .user-dropdown-menu .logout-btn { color: #ff6b6b; }
         .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
@@ -172,7 +202,7 @@
 <body>
 <div class="admin-wrapper">
     <aside class="admin-sidebar">
-        <div class="logo">Meli<span>.</span></div>
+        <div class="logo">Mali<span>.</span></div>
         <nav>
             <div class="nav-label">General</div>
             <a href="dashboard.html">📊 Panel principal</a>
@@ -180,29 +210,29 @@
             <a href="finanzas-personales.html">💰 Finanzas personales</a>
             <a href="deudas.html">💳 Deudas</a>
             <div class="nav-label">Administración</div>
-            <a href="admin.html" class="active">⚙️ Panel admin</a>
-            <a href="admin.html#usuarios" class="sub">👥 Usuarios</a>
-            <a href="admin.html#codigos" class="sub">🔑 Códigos</a>
+            <div class="nav-group">
+                <a href="admin.html" class="active">⚙️ Panel admin</a>
+                <a href="admin.html#usuarios" class="sub">👥 Usuarios</a>
+                <a href="admin.html#codigos" class="sub">🔑 Códigos</a>
+            </div>
         </nav>
     </aside>
 
     <main class="admin-main">
         <div class="admin-header">
             <div>
-                <div style="color:var(--text-secondary);font-size:0.85rem;">⚙️ <span style="color:var(--accent);">Administración</span></div>
+                <div class="breadcrumb">⚙️ <span>Administración</span></div>
                 <h1>Panel de Administración</h1>
             </div>
-            <div style="display:flex;align-items:center;gap:1rem;">
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="avatar" id="userAvatar">M</div>
-                    <span class="name" id="userName">Cargando...</span>
-                    <span class="arrow">▼</span>
-                    <div class="user-dropdown-menu">
-                        <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
-                        <a href="preferencias.html">🎨 Preferencias</a>
-                        <div class="divider"></div>
-                        <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
-                    </div>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="avatar" id="userAvatar">M</div>
+                <span class="name" id="userName">Cargando...</span>
+                <span class="arrow">▼</span>
+                <div class="user-dropdown-menu">
+                    <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                    <a href="preferencias.html">🎨 Preferencias</a>
+                    <div class="divider"></div>
+                    <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
                 </div>
             </div>
         </div>
@@ -237,7 +267,7 @@
                     <label>Cantidad</label>
                     <input type="number" id="genCantidad" value="1" min="1" max="20" style="width:80px;">
                 </div>
-                <button class="btn btn-primary" id="genBtn" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Generar códigos</button>
+                <button class="btn-gen" id="genBtn">Generar códigos</button>
             </div>
 
             <div class="table-wrap">
