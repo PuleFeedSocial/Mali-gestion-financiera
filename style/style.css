@@ -644,7 +644,22 @@ body {
 .access-container .mobile-toggle { display: none; }
 
 /* =========================================
-   7. Clases de Animación JS
+   7. Errores en formularios de auth
+   ========================================= */
+.form-error {
+    background-color: rgba(255, 70, 70, 0.15);
+    border: 1px solid rgba(255, 70, 70, 0.3);
+    color: #ff6b6b;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin: 10px 0;
+    width: 100%;
+    text-align: center;
+}
+
+/* =========================================
+   8. Clases de Animación JS
    ========================================= */
 .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
 .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }

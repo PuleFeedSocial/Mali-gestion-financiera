@@ -4,21 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meli | Acceso y Registro</title>
-    <!-- Vinculas a tu UNICO archivo CSS -->
     <link rel="stylesheet" href="../style/style.css"> 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Este Wrapper envuelve todo para centrarlo -->
     <div class="access-wrapper">
         <a href="../index.html" class="back-home"><span>←</span> Volver al inicio</a>
 
         <div class="access-container" id="access-container">
-            
-           <!-- Panel Izquierdo (Registro) -->
-            <div class="form-container sign-up-container">
-                <form action="dashboard.html">
+           
+           <div class="form-container sign-up-container">
+                <form id="registerForm">
                     <div class="logo-mini">Meli<span>.</span></div>
                     <h1>Crear Cuenta</h1>
                     <div class="social-container">
@@ -26,40 +23,42 @@
                     </div>
                     <span>o usa tu cuenta de Google para registrarte</span>
                     
-                    <input type="text" placeholder="Nombre completo" required />
-                    <input type="email" placeholder="Correo electrónico" required />
-                    <input type="password" placeholder="Contraseña" required />
-                    <input type="password" placeholder="Ingresa nuevamente la contraseña" required />
+                    <div id="registerError" class="form-error" style="display:none;"></div>
 
-                    <!-- NUEVO: Checkbox de Términos y Condiciones -->
+                    <input type="text" id="regName" placeholder="Nombre completo" required />
+                    <input type="email" id="regEmail" placeholder="Correo electrónico" required />
+                    <input type="password" id="regPassword" placeholder="Contraseña" required />
+                    <input type="text" id="regCode" placeholder="Código de activación (6 dígitos)" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required />
+
                     <div class="checkbox-container">
                         <input type="checkbox" id="terms" required />
                         <label for="terms">Acepto los <a href="terminos.html" target="_blank">términos y condiciones</a></label>
                     </div>
 
-                    <button class="btn btn-primary" type="submit">Registrarse</button>
+                    <button class="btn btn-primary" id="registerBtn" type="submit">Registrarse</button>
                     <p class="mobile-toggle">¿Ya tienes cuenta? <a href="#" id="signInMobile">Inicia sesión</a></p>
                 </form>
             </div>
 
-            <!-- Panel Derecho (Login) -->
             <div class="form-container sign-in-container">
-                <form action="dashboard.html">
+                <form id="loginForm">
                     <div class="logo-mini">Meli<span>.</span></div>
                     <h1>Iniciar Sesión</h1>
                     <div class="social-container">
                         <a href="#" class="social">G</a>
                     </div>
                     <span>o usa tu cuenta de Google</span>
-                    <input type="email" placeholder="Correo electrónico" required />
-                    <input type="password" placeholder="Contraseña" required />
+
+                    <div id="loginError" class="form-error" style="display:none;"></div>
+
+                    <input type="email" id="loginEmail" placeholder="Correo electrónico" required />
+                    <input type="password" id="loginPassword" placeholder="Contraseña" required />
                     <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
-                    <button class="btn btn-primary">Acceder</button>
+                    <button class="btn btn-primary" id="loginBtn" type="submit">Acceder</button>
                     <p class="mobile-toggle">¿No tienes cuenta? <a href="#" id="signUpMobile">Regístrate</a></p>
                 </form>
             </div>
 
-            <!-- El Panel Overlay Deslizante -->
             <div class="overlay-container">
                 <div class="overlay">
                     <div class="overlay-panel overlay-left">
@@ -78,34 +77,109 @@
         </div>
     </div>
 
-    <!-- Script Actualizado -->
-    <script>
+    <script type="module">
+        import { getSession, login, register } from '../script/auth.js'
+
+        getSession().then(session => {
+            if (session) window.location.href = 'dashboard.html'
+        })
+
+        function showError(id, msg) {
+            const el = document.getElementById(id)
+            el.textContent = msg
+            el.style.display = 'block'
+        }
+
+        function hideError(id) {
+            document.getElementById(id).style.display = 'none'
+        }
+
+        function setLoading(btnId, loading) {
+            const btn = document.getElementById(btnId)
+            if (loading) {
+                btn.dataset.text = btn.textContent
+                btn.textContent = 'Cargando...'
+                btn.disabled = true
+            } else {
+                btn.textContent = btn.dataset.text || btn.textContent
+                btn.disabled = false
+            }
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault()
+            hideError('registerError')
+
+            const name = document.getElementById('regName').value.trim()
+            const email = document.getElementById('regEmail').value.trim()
+            const password = document.getElementById('regPassword').value.trim()
+            const code = document.getElementById('regCode').value.trim()
+
+            if (!name || !email || !password || !code) {
+                showError('registerError', 'Todos los campos son obligatorios.')
+                return
+            }
+
+            if (password.length < 6) {
+                showError('registerError', 'La contraseña debe tener al menos 6 caracteres.')
+                return
+            }
+
+            if (!/^[0-9]{6}$/.test(code)) {
+                showError('registerError', 'El código de activación debe tener 6 dígitos numéricos.')
+                return
+            }
+
+            setLoading('registerBtn', true)
+
+            try {
+                await register(name, email, password, code)
+                window.location.href = 'dashboard.html'
+            } catch (err) {
+                showError('registerError', err.message || 'Error al registrarse.')
+                setLoading('registerBtn', false)
+            }
+        })
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault()
+            hideError('loginError')
+
+            const email = document.getElementById('loginEmail').value.trim()
+            const password = document.getElementById('loginPassword').value.trim()
+
+            if (!email || !password) {
+                showError('loginError', 'Todos los campos son obligatorios.')
+                return
+            }
+
+            setLoading('loginBtn', true)
+
+            try {
+                await login(email, password)
+                window.location.href = 'dashboard.html'
+            } catch (err) {
+                showError('loginError', err.message || 'Credenciales inválidas.')
+                setLoading('loginBtn', false)
+            }
+        })
+
+        document.getElementById('regCode').addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '')
+        })
+
         document.addEventListener('DOMContentLoaded', () => {
-            const signUpButton = document.getElementById('signUp');
-            const signInButton = document.getElementById('signIn');
-            const container = document.getElementById('access-container'); // <--- ID Actualizado
+            const signUpButton = document.getElementById('signUp')
+            const signInButton = document.getElementById('signIn')
+            const container = document.getElementById('access-container')
+            const signUpMobile = document.getElementById('signUpMobile')
+            const signInMobile = document.getElementById('signInMobile')
 
-            const signUpMobile = document.getElementById('signUpMobile');
-            const signInMobile = document.getElementById('signInMobile');
-
-            signUpButton.addEventListener('click', () => {
-                container.classList.add("right-panel-active");
-            });
-
-            signInButton.addEventListener('click', () => {
-                container.classList.remove("right-panel-active");
-            });
-
-            signUpMobile.addEventListener('click', (e) => {
-                e.preventDefault(); 
-                container.classList.add("right-panel-active");
-            });
-
-            signInMobile.addEventListener('click', (e) => {
-                e.preventDefault();
-                container.classList.remove("right-panel-active");
-            });
-        });
+            signUpButton.addEventListener('click', () => container.classList.add('right-panel-active'))
+            signInButton.addEventListener('click', () => container.classList.remove('right-panel-active'))
+            signUpMobile.addEventListener('click', (e) => { e.preventDefault(); container.classList.add('right-panel-active') })
+            signInMobile.addEventListener('click', (e) => { e.preventDefault(); container.classList.remove('right-panel-active') })
+        })
     </script>
 </body>
 </html>
