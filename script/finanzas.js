@@ -4,19 +4,24 @@ export async function getBalance() {
   const session = await getSession()
   if (!session) return null
 
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('type, amount')
-    .eq('user_id', session.user.id)
+  const [txData, debtData] = await Promise.all([
+    supabase.from('transactions').select('type, amount').eq('user_id', session.user.id),
+    supabase.from('debts').select('type, amount, status').eq('user_id', session.user.id).eq('status', 'pendiente')
+  ])
 
-  if (error) throw error
+  if (txData.error) throw txData.error
+  if (debtData.error) throw debtData.error
 
-  const total = { ingresos: 0, gastos: 0 }
-  for (const t of data) {
+  const total = { ingresos: 0, gastos: 0, por_cobrar: 0, por_pagar: 0 }
+  for (const t of txData.data) {
     if (t.type === 'ingreso') total.ingresos += Number(t.amount)
     else total.gastos += Number(t.amount)
   }
-  total.balance = total.ingresos - total.gastos
+  for (const d of debtData.data) {
+    if (d.type === 'por_cobrar') total.por_cobrar += Number(d.amount)
+    else total.por_pagar += Number(d.amount)
+  }
+  total.balance = total.ingresos - total.gastos + total.por_cobrar - total.por_pagar
   return total
 }
 
@@ -141,4 +146,85 @@ export async function processScheduled() {
       scheduled_id: s.id
     })
   }
+}
+
+export async function addDebt({ type, debtor, amount, description, dueDate }) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+
+  const { error } = await supabase.from('debts').insert({
+    user_id: session.user.id,
+    type,
+    debtor,
+    amount,
+    description,
+    due_date: dueDate
+  })
+  if (error) throw error
+}
+
+export async function getDebts({ status, type } = {}) {
+  const session = await getSession()
+  if (!session) return []
+
+  let query = supabase
+    .from('debts')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('due_date', { ascending: true })
+
+  if (status) query = query.eq('status', status)
+  if (type) query = query.eq('type', type)
+
+  const { data, error } = await query
+  if (error) throw error
+  return data || []
+}
+
+export async function updateDebtStatus(id, newStatus) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+
+  const { data: debt, error: fetchError } = await supabase
+    .from('debts')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', session.user.id)
+    .single()
+  if (fetchError) throw fetchError
+  if (!debt) throw new Error('Deuda no encontrada.')
+
+  const { error: updateError } = await supabase
+    .from('debts')
+    .update({ status: newStatus })
+    .eq('id', id)
+    .eq('user_id', session.user.id)
+  if (updateError) throw updateError
+
+  if (newStatus === 'cobrado') {
+    await supabase.from('transactions').insert({
+      user_id: session.user.id,
+      type: 'ingreso',
+      subtype: 'instantaneo',
+      amount: debt.amount,
+      description: `Cobro: ${debt.debtor} - ${debt.description}`,
+      date: new Date().toISOString().split('T')[0]
+    })
+  } else if (newStatus === 'pagado') {
+    await supabase.from('transactions').insert({
+      user_id: session.user.id,
+      type: 'gasto',
+      subtype: 'variable',
+      amount: debt.amount,
+      description: `Pago: ${debt.debtor} - ${debt.description}`,
+      date: new Date().toISOString().split('T')[0]
+    })
+  }
+}
+
+export async function deleteDebt(id) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+  const { error } = await supabase.from('debts').delete().eq('id', id).eq('user_id', session.user.id)
+  if (error) throw error
 }

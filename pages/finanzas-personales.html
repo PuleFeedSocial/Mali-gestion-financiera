@@ -256,6 +256,7 @@
             <div class="nav-label">Finanzas</div>
             <a href="finanzas-personales.html" class="active">💰 Finanzas personales</a>
             <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            <a href="deudas.html">💳 Deudas</a>
             <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
             <a href="admin.html" id="adminLink" class="sub" style="display:none;">⚙️ Panel admin</a>
 
@@ -297,7 +298,15 @@
                 <div class="label">💸 Gastos totales</div>
                 <div class="amount negative" id="totalGastos">$0.00</div>
             </div>
-            <div class="balance-card total">
+            <div class="balance-card" style="border-color:rgba(199,239,0,0.15);">
+                <div class="label">📄 Por cobrar</div>
+                <div class="amount positive" id="porCobrar">$0.00</div>
+            </div>
+            <div class="balance-card" style="border-color:rgba(255,107,107,0.15);">
+                <div class="label">📄 Por pagar</div>
+                <div class="amount negative" id="porPagar">$0.00</div>
+            </div>
+            <div class="balance-card total" style="grid-column:1/-1;">
                 <div class="label">⚖️ Balance total</div>
                 <div class="amount" id="totalBalance">$0.00</div>
             </div>
@@ -436,6 +445,8 @@
             if (balance) {
                 document.getElementById('totalIngresos').textContent = `$${balance.ingresos.toFixed(2)}`
                 document.getElementById('totalGastos').textContent = `$${balance.gastos.toFixed(2)}`
+                document.getElementById('porCobrar').textContent = `$${balance.por_cobrar.toFixed(2)}`
+                document.getElementById('porPagar').textContent = `$${balance.por_pagar.toFixed(2)}`
                 const bEl = document.getElementById('totalBalance')
                 bEl.textContent = `$${balance.balance.toFixed(2)}`
                 bEl.className = `amount ${balance.balance >= 0 ? 'positive' : 'negative'}`

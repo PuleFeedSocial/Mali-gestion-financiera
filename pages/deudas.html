@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meli | Deudas</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; }
+        .d-wrapper { display: flex; min-height: 100vh; }
+        .d-sidebar {
+            width: 240px; background-color: #1f1f1d;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem 0; flex-shrink: 0;
+        }
+        .d-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; }
+        .d-sidebar .logo span { color: var(--accent); }
+        .d-sidebar nav a {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.7rem 1.5rem; color: var(--text-secondary);
+            text-decoration: none; font-size: 0.9rem;
+            transition: all 0.2s; border-left: 3px solid transparent;
+        }
+        .d-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.05); }
+        .d-sidebar nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(199,239,0,0.08); }
+        .d-sidebar .nav-label { padding: 1rem 1.5rem 0.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.3); font-weight: 600; }
+        .d-sidebar nav a.sub { padding-left: 3rem; font-size: 0.85rem; }
+
+        .d-main { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
+        .d-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+        .d-header h1 { font-size: 1.5rem; letter-spacing: -0.5px; margin: 0; }
+        .d-header .breadcrumb { color: var(--text-secondary); font-size: 0.85rem; }
+
+        .resumen-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .resumen-card { background: var(--surface-color); border-radius: 14px; padding: 1.2rem 1.5rem; border: 1px solid rgba(255,255,255,0.08); }
+        .resumen-card .label { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.2rem; }
+        .resumen-card .amount { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+        .resumen-card .amount.positive { color: var(--accent); }
+        .resumen-card .amount.negative { color: #ff6b6b; }
+        .resumen-card.pendientes { border-color: rgba(255,165,0,0.2); }
+        .resumen-card.vencidas { border-color: rgba(255,107,107,0.2); }
+
+        .section-card { background: #1f1f1d; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; margin-bottom: 2rem; }
+        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        .form-deuda { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.8rem; align-items: end; }
+        .form-deuda .field { display: flex; flex-direction: column; gap: 0.3rem; }
+        .form-deuda .field label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; }
+        .form-deuda select, .form-deuda input {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary); padding: 0.6rem 0.8rem; border-radius: 8px;
+            font-size: 0.85rem; outline: none;
+        }
+        .form-deuda select:focus, .form-deuda input:focus { border-color: var(--accent); }
+        .form-deuda select option { background: #1f1f1d; color: white; }
+
+        .table-wrap { overflow-x: auto; }
+        table.d-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        table.d-table th { text-align: left; padding: 0.7rem 1rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 600; }
+        table.d-table td { padding: 0.7rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        table.d-table tr:hover td { background: rgba(255,255,255,0.02); }
+        table.d-table .badge {
+            font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600;
+        }
+        table.d-table .badge.pendiente { background: rgba(255,165,0,0.15); color: #ffa500; }
+        table.d-table .badge.cobrado { background: rgba(199,239,0,0.15); color: var(--accent); }
+        table.d-table .badge.pagado { background: rgba(100,200,255,0.15); color: #64c8ff; }
+        table.d-table .badge.cancelado { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+        table.d-table .badge.vencida { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+        table.d-table .monto { font-weight: 600; }
+        table.d-table .monto.cobrar { color: var(--accent); }
+        table.d-table .monto.pagar { color: #ff6b6b; }
+        .small-btn {
+            padding: 0.3rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+            background: transparent; color: var(--text-secondary); cursor: pointer;
+            font-size: 0.7rem; transition: all 0.2s; margin-right: 0.3rem;
+        }
+        .small-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .small-btn.primary-hover:hover { border-color: var(--accent); color: var(--accent); }
+        .small-btn.danger-hover:hover { border-color: #ff6b6b; color: #ff6b6b; }
+
+        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .user-dropdown .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--bg-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .user-dropdown .name { font-size: 0.85rem; font-weight: 500; }
+        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; }
+        .user-dropdown.open .arrow { transform: rotate(180deg); }
+        .user-dropdown-menu { position: absolute; top: calc(100% + 8px); right: 0; background: #1f1f1d; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.5rem; min-width: 200px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200; }
+        .user-dropdown.open .user-dropdown-menu { display: block; }
+        .user-dropdown-menu a { display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0.8rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: all 0.15s; }
+        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .user-dropdown-menu .divider { height: 1px; background: rgba(255,255,255,0.08); margin: 0.3rem 0.5rem; }
+        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
+        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
+        .msg { padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.15); border: 1px solid rgba(199,239,0,0.3); color: var(--accent); }
+
+        @media (max-width: 768px) { .d-sidebar { display: none; } .d-main { padding: 1.5rem; } }
+    </style>
+</head>
+<body>
+<div class="d-wrapper">
+    <aside class="d-sidebar">
+        <div class="logo">Meli<span>.</span></div>
+        <nav>
+            <div class="nav-label">General</div>
+            <a href="dashboard.html">📊 Panel principal</a>
+            <div class="nav-label">Finanzas</div>
+            <a href="finanzas-personales.html">💰 Finanzas personales</a>
+            <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            <a href="deudas.html" class="active">💳 Deudas</a>
+            <a href="#" style="opacity:0.4;pointer-events:none;">📈 Inversiones</a>
+            <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
+            <a href="admin.html" id="adminLink" class="sub" style="display:none;">⚙️ Panel admin</a>
+            <div class="nav-label">Próximamente</div>
+            <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
+            <a href="#" style="opacity:0.4;pointer-events:none;">📁 Organización</a>
+        </nav>
+    </aside>
+
+    <main class="d-main">
+        <div class="d-header">
+            <div>
+                <div class="breadcrumb">💳 <span style="color:var(--accent);">Deudas y cobros</span></div>
+                <h1>Deudas</h1>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="avatar" id="userAvatar">M</div>
+                    <span class="name" id="userName">Cargando...</span>
+                    <span class="arrow">▼</span>
+                    <div class="user-dropdown-menu">
+                        <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                        <a href="preferencias.html">🎨 Preferencias</a>
+                        <div class="divider"></div>
+                        <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dMsg" class="msg"></div>
+
+        <div class="resumen-grid" id="resumenGrid">
+            <div class="resumen-card">
+                <div class="label">💰 Por cobrar</div>
+                <div class="amount positive" id="porCobrar">$0.00</div>
+            </div>
+            <div class="resumen-card">
+                <div class="label">💸 Por pagar</div>
+                <div class="amount negative" id="porPagar">$0.00</div>
+            </div>
+            <div class="resumen-card pendientes">
+                <div class="label">⏳ Pendientes</div>
+                <div class="amount" id="pendientesCount" style="font-size:1.3rem;color:var(--text-primary);">0</div>
+            </div>
+            <div class="resumen-card vencidas">
+                <div class="label">⚠️ Vencidas</div>
+                <div class="amount" id="vencidasCount" style="font-size:1.3rem;color:#ff6b6b;">0</div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">➕ Nueva deuda</div>
+            <div class="form-deuda" id="deudaForm">
+                <div class="field">
+                    <label>Tipo</label>
+                    <select id="fTipo">
+                        <option value="por_cobrar">Por cobrar (me deben)</option>
+                        <option value="por_pagar">Por pagar (debo)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Persona / Entidad</label>
+                    <input type="text" id="fDeudor" placeholder="Nombre de quien te debe/debes">
+                </div>
+                <div class="field">
+                    <label>Monto ($)</label>
+                    <input type="number" id="fMonto" step="0.01" min="0.01" placeholder="0.00">
+                </div>
+                <div class="field">
+                    <label>Descripción</label>
+                    <input type="text" id="fDesc" placeholder="Ej: Préstamo, compra...">
+                </div>
+                <div class="field">
+                    <label>Fecha de cobro/pago</label>
+                    <input type="date" id="fFecha">
+                </div>
+                <div class="field">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" id="addBtn" style="padding:0.6rem 1.5rem;font-size:0.85rem;">Agregar deuda</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+                <span>📋 Todas las deudas</span>
+                <select id="filtroEstado" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-primary);padding:0.3rem 0.6rem;border-radius:6px;font-size:0.8rem;outline:none;">
+                    <option value="todas">Todas</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="cobrado">Cobradas</option>
+                    <option value="pagado">Pagadas</option>
+                    <option value="cancelado">Canceladas</option>
+                </select>
+            </div>
+            <div class="table-wrap">
+                <table class="d-table">
+                    <thead>
+                        <tr>
+                            <th>Vence</th>
+                            <th>Tipo</th>
+                            <th>Persona</th>
+                            <th>Concepto</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="deudasBody">
+                        <tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
+    import { getBalance, addDebt, getDebts, updateDebtStatus, deleteDebt } from '../script/finanzas.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    document.getElementById('userName').textContent = profile?.name || 'Usuario'
+    document.getElementById('userAvatar').textContent = (profile?.name || 'U').charAt(0).toUpperCase()
+    if (profile?.role === 'admin') {
+        document.getElementById('adminLabel').style.display = 'block'
+        document.getElementById('adminLink').style.display = 'flex'
+    }
+
+    const dd = document.getElementById('userDropdown')
+    dd.addEventListener('click', (e) => { if (!e.target.closest('.user-dropdown-menu')) dd.classList.toggle('open') })
+    document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
+
+    const msg = document.getElementById('dMsg')
+    function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 3500) }
+
+    document.getElementById('fFecha').value = new Date().toISOString().split('T')[0]
+
+    async function cargarResumen() {
+        const balance = await getBalance()
+        if (balance) {
+            document.getElementById('porCobrar').textContent = `$${balance.por_cobrar.toFixed(2)}`
+            document.getElementById('porPagar').textContent = `$${balance.por_pagar.toFixed(2)}`
+        }
+    }
+
+    function marcarVencidas(deudas) {
+        const hoy = new Date()
+        deudas.forEach(d => {
+            if (d.status === 'pendiente' && new Date(d.due_date + 'T23:59:59') < hoy) {
+                d.vencida = true
+            }
+        })
+        return deudas
+    }
+
+    async function cargarDeudas() {
+        const todas = await getDebts()
+        const conVencidas = marcarVencidas(todas)
+        const pendientes = conVencidas.filter(d => d.status === 'pendiente' && !d.vencida)
+        const vencidas = conVencidas.filter(d => d.status === 'pendiente' && d.vencida)
+        document.getElementById('pendientesCount').textContent = pendientes.length
+        document.getElementById('vencidasCount').textContent = vencidas.length
+
+        const filtro = document.getElementById('filtroEstado').value
+        let filtradas = conVencidas
+        if (filtro === 'pendiente') filtradas = conVencidas.filter(d => d.status === 'pendiente' && !d.vencida)
+        else if (filtro === 'vencidas') filtradas = conVencidas.filter(d => d.status === 'pendiente' && d.vencida)
+        else if (filtro !== 'todas') filtradas = conVencidas.filter(d => d.status === filtro)
+
+        renderDeudas(filtradas)
+    }
+
+    function renderDeudas(deudas) {
+        const tbody = document.getElementById('deudasBody')
+        if (!deudas.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay deudas registradas.</td></tr>'
+            return
+        }
+        tbody.innerHTML = deudas.map(d => {
+            const vence = new Date(d.due_date + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+            const cls = d.type === 'por_cobrar' ? 'cobrar' : 'pagar'
+            const signo = d.type === 'por_cobrar' ? '+' : '-'
+            const estadoCls = d.vencida ? 'vencida' : d.status
+            const estadoTxt = d.vencida ? 'Vencida' : { pendiente: 'Pendiente', cobrado: 'Cobrada', pagado: 'Pagada', cancelado: 'Cancelada' }[d.status]
+            let acciones = ''
+            if (d.status === 'pendiente') {
+                const accion = d.type === 'por_cobrar' ? 'cobrado' : 'pagado'
+                const txtBtn = d.type === 'por_cobrar' ? 'Cobrar' : 'Pagar'
+                acciones = `<button class="small-btn primary-hover" onclick="cobrarPagar(${d.id},'${accion}')">${txtBtn}</button>`
+                acciones += `<button class="small-btn danger-hover" onclick="cancelar(${d.id})">Cancelar</button>`
+            }
+            return `<tr>
+                <td style="color:${d.vencida ? '#ff6b6b' : 'var(--text-secondary)'};font-size:0.85rem;">${vence}</td>
+                <td>${d.type === 'por_cobrar' ? '💰 Cobrar' : '💸 Pagar'}</td>
+                <td>${d.debtor}</td>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${d.description || '-'}</td>
+                <td class="monto ${cls}">${signo}$${Number(d.amount).toFixed(2)}</td>
+                <td><span class="badge ${estadoCls}">${estadoTxt}</span></td>
+                <td>${acciones}</td>
+            </tr>`
+        }).join('')
+    }
+
+    window.cobrarPagar = async function(id, accion) {
+        try {
+            await updateDebtStatus(id, accion)
+            showMsg('Deuda actualizada.', 'success')
+            await Promise.all([cargarResumen(), cargarDeudas()])
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    }
+
+    window.cancelar = async function(id) {
+        if (!confirm('¿Cancelar esta deuda?')) return
+        try {
+            await updateDebtStatus(id, 'cancelado')
+            showMsg('Deuda cancelada.', 'success')
+            await Promise.all([cargarResumen(), cargarDeudas()])
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    }
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        const tipo = document.getElementById('fTipo').value
+        const debtor = document.getElementById('fDeudor').value.trim()
+        const amount = parseFloat(document.getElementById('fMonto').value)
+        const description = document.getElementById('fDesc').value.trim()
+        const dueDate = document.getElementById('fFecha').value
+
+        if (!debtor) { showMsg('Ingresá el nombre de la persona o entidad.', 'error'); return }
+        if (!amount || amount <= 0) { showMsg('Ingresá un monto válido.', 'error'); return }
+        if (!dueDate) { showMsg('Seleccioná una fecha.', 'error'); return }
+
+        try {
+            await addDebt({ type: tipo, debtor, amount, description, dueDate })
+            showMsg('Deuda registrada.', 'success')
+            document.getElementById('fDeudor').value = ''; document.getElementById('fMonto').value = ''; document.getElementById('fDesc').value = ''
+            document.getElementById('fFecha').value = new Date().toISOString().split('T')[0]
+            await Promise.all([cargarResumen(), cargarDeudas()])
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    })
+
+    document.getElementById('filtroEstado').addEventListener('change', cargarDeudas)
+
+    await Promise.all([cargarResumen(), cargarDeudas()])
+</script>
+</body>
+</html>
