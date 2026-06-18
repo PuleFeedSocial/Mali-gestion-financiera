@@ -301,6 +301,7 @@
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
         </nav>
+        <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
     <main class="c-main">
@@ -468,7 +469,7 @@
         const prevDays = prevMonth.getDate()
         for (let i = startDay - 1; i >= 0; i--) {
             const d = prevDays - i
-            const dateStr = `${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+            const pm = currentMonth === 0 ? 12 : currentMonth; const py = currentMonth === 0 ? currentYear - 1 : currentYear; const dateStr = `${py}-${String(pm).padStart(2,'0')}-${String(d).padStart(2,'0')}`
             grid.appendChild(createDayCell(d, dateStr, true, todayStr))
         }
         for (let d = 1; d <= daysInMonth; d++) {
@@ -478,7 +479,7 @@
         const totalCells = startDay + daysInMonth
         const remaining = (7 - (totalCells % 7)) % 7
         for (let d = 1; d <= remaining; d++) {
-            const dateStr = `${currentYear}-${String(currentMonth + 2).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+            const nm = currentMonth === 11 ? 1 : currentMonth + 2; const ny = currentMonth === 11 ? currentYear + 1 : currentYear; const dateStr = `${ny}-${String(nm).padStart(2,'0')}-${String(d).padStart(2,'0')}`
             grid.appendChild(createDayCell(d, dateStr, true, todayStr))
         }
     }

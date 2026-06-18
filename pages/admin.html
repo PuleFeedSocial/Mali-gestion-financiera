@@ -205,18 +205,18 @@
         }
         @media (max-width: 768px) {
             .mobile-menu-btn { display: flex; }
-            .a-sidebar {
+            .admin-sidebar {
                 position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
                 transform: translateX(-100%); transition: transform 0.3s ease;
                 width: 260px;
             }
-            .a-sidebar.open { transform: translateX(0); }
-            .a-wrapper::before {
+            .admin-sidebar.open { transform: translateX(0); }
+            .admin-wrapper::before {
                 content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
                 z-index: 99; display: none;
             }
-            .a-wrapper.overlay::before { display: block; }
-            .a-main { padding: 1.5rem; }
+            .admin-wrapper.overlay::before { display: block; }
+            .admin-main { padding: 1.5rem; }
             .admin-grid { grid-template-columns: 1fr; }
             .table-wrap { overflow-x: auto; }
             table { min-width: 700px; }
@@ -256,6 +256,7 @@
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
         </nav>
+        <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
     <main class="admin-main">
@@ -332,7 +333,7 @@
 </div>
 
 <script type="module">
-    import { requireAuth, getUserProfile, supabase, logout, formatCurrency } from '../script/auth.js'
+    import { requireAuth, getUserProfile, supabase, logout } from '../script/auth.js'
 
     const session = await requireAuth()
     if (!session) throw new Error()
@@ -456,7 +457,7 @@
         const codigos = []
 
         for (let i = 0; i < cantidad; i++) {
-            const code = String(Math.floor(100000 + Math.random() * 900000))
+            const buf = new Uint32Array(1); crypto.getRandomValues(buf); const code = String(100000 + (buf[0] % 900000))
             codigos.push({ code })
         }
 
@@ -472,8 +473,8 @@
 
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
     document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.a-sidebar')?.classList.toggle('open')
-        document.querySelector('.a-wrapper')?.classList.toggle('overlay')
+        document.querySelector('.admin-sidebar')?.classList.toggle('open')
+        document.querySelector('.admin-wrapper')?.classList.toggle('overlay')
     })
 
     await cargarUsuarios()

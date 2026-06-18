@@ -386,6 +386,7 @@
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
         </nav>
+        <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
     <main class="fp-main">
@@ -549,7 +550,6 @@
         }
     }
 
-    const fm = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const msg = document.getElementById('msg')
     function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 4000) }
 

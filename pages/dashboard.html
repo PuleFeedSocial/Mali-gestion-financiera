@@ -189,6 +189,7 @@
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
         </nav>
+        <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
     <main class="dash-main">
@@ -247,7 +248,7 @@
 </div>
 
 <script type="module">
-    import { requireAuth, getUserProfile, logout, formatCurrency } from '../script/auth.js'
+    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
 
     const session = await requireAuth()
     if (!session) throw new Error()

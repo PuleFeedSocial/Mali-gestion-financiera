@@ -82,7 +82,7 @@
 
         getSession().then(session => {
             if (session) window.location.href = 'dashboard.html'
-        })
+        }).catch(() => {})
 
         function showError(id, msg) {
             const el = document.getElementById(id)
@@ -192,5 +192,6 @@
             signInMobile.addEventListener('click', (e) => { e.preventDefault(); container.classList.remove('right-panel-active') })
         })
     </script>
+    <div class="footer-brand">⚡ CoreTech System</div>
 </body>
 </html>

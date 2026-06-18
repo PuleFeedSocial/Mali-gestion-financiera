@@ -287,6 +287,7 @@
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
         </nav>
+        <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
     <main class="d-main">
@@ -593,7 +594,7 @@
 
     document.getElementById('filtroEstado').addEventListener('change', cargarDeudas)
 
-    await Promise.all([cargarResumen(), cargarDeudas()])
+    try { await Promise.all([cargarResumen(), cargarDeudas()]) } catch (e) { showMsg('Error al cargar: ' + e.message, 'error') }
 </script>
 </body>
 </html>

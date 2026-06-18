@@ -205,6 +205,7 @@
             <div class="nav-label">Próximamente</div>
             <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
         </nav>
+        <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
     <main class="t-main">
@@ -293,7 +294,7 @@
 </div>
 
 <script type="module">
-    import { requireAuth, getUserProfile, logout, formatCurrency } from '../script/auth.js'
+    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
     import { getTasks, addTask, updateTaskStatus, updateTask, deleteTask } from '../script/tareas.js'
 
     const session = await requireAuth()
@@ -352,7 +353,7 @@
                 <td><span class="tag-pill ${t.tag || 'personal'}">${({academic:'📚 Académico', freelance:'💼 Freelance', personal:'🎯 Personal'})[t.tag] || '🎯 Personal'}</span></td>
                 <td><div style="display:flex;gap:0.3rem;flex-wrap:wrap;">${badges}</div></td>
                 <td style="text-align:right;">
-                    <button class="edit-btn" onclick="editarTarea(${t.id}, '${t.tag || 'personal'}')" title="Editar">✏️</button>
+                    <button class="edit-btn" onclick="editarTarea(${t.id}, '${t.tag || 'personal'}', '${t.date}')" title="Editar">✏️</button>
                     <button class="del-btn" onclick="eliminarTarea(${t.id})" title="Eliminar">✕</button>
                 </td>
             </tr>`
@@ -376,13 +377,13 @@
         } catch (e) { showMsg('Error: ' + e.message, 'error') }
     }
 
-    window.editarTarea = async function(id, currentTag) {
+    window.editarTarea = async function(id, currentTag, currentDate) {
         const desc = prompt('Nueva descripción:')
         if (!desc || desc.trim() === '') return
         const tag = prompt('Etiqueta (personal, academic, freelance):', currentTag || 'personal')
         if (!tag || !['personal','academic','freelance'].includes(tag)) return
         try {
-            await updateTask(id, { date: new Date().toISOString().split('T')[0], type: 'tarea', description: desc.trim(), tag })
+            await updateTask(id, { date: currentDate, type: 'tarea', description: desc.trim(), tag })
             showMsg('Tarea actualizada.', 'success')
             await cargarTareas()
         } catch (e) { showMsg('Error: ' + e.message, 'error') }

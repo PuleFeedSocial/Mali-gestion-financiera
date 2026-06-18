@@ -769,3 +769,23 @@ body {
         font-size: 0.75rem; /* Ajuste para que los términos quepan sin problemas */
     }
 }
+
+/* =========================================
+   7. CoreTech System Branding
+   ========================================= */
+.sidebar-footer {
+    padding: 1rem 1.5rem 0.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 1.5rem;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    letter-spacing: 0.5px;
+}
+.footer-brand {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+}

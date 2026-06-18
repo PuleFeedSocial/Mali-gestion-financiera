@@ -202,9 +202,11 @@ export async function updateProfile(data) {
   if (error) throw error
 }
 
+const symbols = { ARS: '$', USD: '$', EUR: '€', GBP: '£', JPY: '¥', BRL: 'R$' }
 export function formatCurrency(amount, currency) {
-  const n = Number(amount).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  return `$${n} ${currency || 'ARS'}`
+  const c = currency || 'ARS'
+  const n = Number(amount).toLocaleString('es-AR', { minimumFractionDigits: c === 'JPY' ? 0 : 2, maximumFractionDigits: c === 'JPY' ? 0 : 2 })
+  return `${symbols[c] || '$'}${n} ${c}`
 }
 
 export { supabase }
