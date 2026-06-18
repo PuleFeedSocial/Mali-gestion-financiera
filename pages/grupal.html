@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mali | Grupal</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: #1f1f1d;
+            --border: rgba(255,255,255,0.08);
+            --radius: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .g-wrapper {
+            width: 100%;
+            max-width: 860px;
+            padding: 2rem;
+        }
+
+        .g-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .g-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 0.5rem;
+        }
+        .g-header h1 span { color: var(--accent); }
+        .g-header p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .g-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .g-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .g-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+
+        .g-card .icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: rgba(199,239,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.2rem;
+        }
+        .g-card h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .g-card .sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.8rem;
+        }
+
+        .g-card .field {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .g-card .field label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            text-align: left;
+            letter-spacing: 0.3px;
+        }
+        .g-card input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.7rem 0.8rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .g-card input:focus { border-color: var(--accent); }
+        .g-card input.code-input {
+            font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 1.3rem;
+            letter-spacing: 4px;
+            text-align: center;
+            text-transform: uppercase;
+            padding: 0.8rem 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-color);
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+        }
+        .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.7rem 2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+        }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+        .g-card .msg {
+            font-size: 0.8rem;
+            margin-top: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            display: none;
+            width: 100%;
+        }
+        .g-card .msg.error { display: block; background: rgba(248,113,113,0.1); color: #f87171; }
+        .g-card .msg.success { display: block; background: rgba(199,239,0,0.1); color: var(--accent); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-top: 2.5rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        @media (max-width: 700px) {
+            .g-grid { grid-template-columns: 1fr; }
+            .g-header h1 { font-size: 1.6rem; }
+            .g-wrapper { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="g-wrapper">
+    <div class="g-header">
+        <h1>Mali<span>.</span></h1>
+        <p>Colaborá en equipo. Compartí calendarios y tareas.</p>
+    </div>
+
+    <div class="g-grid">
+        <!-- Card 1: Crear -->
+        <div class="g-card">
+            <div class="icon">🚀</div>
+            <h2>Crear nuevo espacio</h2>
+            <p class="sub">Armá un grupo para compartir tareas y eventos con tu equipo.</p>
+            <div class="field">
+                <label>Nombre del equipo</label>
+                <input type="text" id="createName" placeholder="Ej: Proyecto X, Familia, Roomies...">
+            </div>
+            <button class="btn-primary" id="createBtn">Crear y administrar</button>
+            <div id="createMsg" class="msg"></div>
+        </div>
+
+        <!-- Card 2: Unirse -->
+        <div class="g-card">
+            <div class="icon">🔑</div>
+            <h2>Tengo una invitación</h2>
+            <p class="sub">Ingresá el código de acceso que te compartió el administrador.</p>
+            <div class="field">
+                <label>Código de acceso</label>
+                <input type="text" class="code-input" id="joinCode" placeholder="••••••" maxlength="6" inputmode="text" autocomplete="off">
+            </div>
+            <button class="btn-outline" id="joinBtn">Unirse al grupo</button>
+            <div id="joinMsg" class="msg"></div>
+        </div>
+    </div>
+
+    <div style="text-align:center;">
+        <a href="dashboard.html" class="back-link">← Volver al panel principal</a>
+    </div>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile } from '../script/auth.js'
+    import { getUserGroups, createGroup, joinGroup } from '../script/grupal.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    // If user already has groups, redirect to group dashboard
+    const existing = await getUserGroups()
+    if (existing.length > 0) {
+        window.location.href = 'dashboard.html'
+        throw new Error()
+    }
+
+    function showMsg(el, text, type) {
+        el.textContent = text
+        el.className = `msg ${type}`
+    }
+
+    function clearMsg(el) { el.className = 'msg' }
+
+    document.getElementById('joinCode').addEventListener('input', function() {
+        this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
+    })
+
+    document.getElementById('createBtn').addEventListener('click', async () => {
+        const name = document.getElementById('createName').value.trim()
+        const msgEl = document.getElementById('createMsg')
+        clearMsg(msgEl)
+        if (!name) { showMsg(msgEl, 'Ingresá un nombre para el equipo.', 'error'); return }
+        try {
+            const group = await createGroup(name)
+            showMsg(msgEl, `¡Espacio "${group.name}" creado! Código: ${group.code}`, 'success')
+            document.getElementById('createName').value = ''
+        } catch (e) { showMsg(msgEl, e.message, 'error') }
+    })
+
+    document.getElementById('joinBtn').addEventListener('click', async () => {
+        const code = document.getElementById('joinCode').value.trim()
+        const msgEl = document.getElementById('joinMsg')
+        clearMsg(msgEl)
+        if (!code || code.length < 4) { showMsg(msgEl, 'Ingresá un código de acceso válido.', 'error'); return }
+        try {
+            const group = await joinGroup(code)
+            showMsg(msgEl, `¡Bienvenido a "${group.name}"!`, 'success')
+            document.getElementById('joinCode').value = ''
+        } catch (e) { showMsg(msgEl, e.message, 'error') }
+    })
+
+    document.getElementById('joinCode').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('joinBtn').click()
+    })
+    document.getElementById('createName').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('createBtn').click()
+    })
+</script>
+</body>
+</html>
