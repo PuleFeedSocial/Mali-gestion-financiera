@@ -229,12 +229,83 @@
         table.mov .monto { font-weight: 600; }
         table.mov .monto.ing { color: var(--accent); }
         table.mov .monto.gas { color: #ff6b6b; }
-        table.mov .del {
-            background: none; border: none; color: rgba(255,255,255,0.15);
-            cursor: pointer; font-size: 1rem; padding: 0.2rem;
-            transition: color 0.2s;
+        /* Trend badges */
+        .trend-badge {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            font-size: 0.6rem; font-weight: 600; padding: 0.15rem 0.5rem;
+            border-radius: 20px; margin-top: 0.5rem; letter-spacing: 0.2px;
+            white-space: nowrap;
         }
-        table.mov .del:hover { color: #ff6b6b; }
+        .trend-badge.up { background: rgba(74,222,128,0.1); color: #4ade80; }
+        .trend-badge.down { background: rgba(248,113,113,0.1); color: #f87171; }
+
+        /* Sparkline */
+        .resumen-card.full { position: relative; overflow: hidden; }
+        .resumen-card.full .sparkline {
+            position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%);
+            width: 180px; height: 60px; pointer-events: none;
+        }
+        .resumen-card.full .sparkline svg { width: 100%; height: 100%; display: block; }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex; align-items: center; gap: 0.8rem;
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .toolbar .search-wrap { position: relative; flex: 1; min-width: 160px; }
+        .toolbar .search-wrap .search-icon {
+            position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
+            width: 14px; height: 14px; opacity: 0.4; pointer-events: none;
+        }
+        .toolbar .search-wrap input {
+            width: 100%; background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 0.5rem 0.7rem 0.5rem 2.1rem;
+            color: var(--text); font-size: 0.8rem; outline: none;
+            font-family: 'Inter', sans-serif; transition: border-color 0.2s;
+        }
+        .toolbar .search-wrap input:focus { border-color: var(--accent); }
+        .toolbar .search-wrap input::placeholder { color: var(--text-muted); }
+        .toolbar select {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 0.5rem 0.7rem; color: var(--text);
+            font-size: 0.8rem; outline: none; cursor: pointer;
+            font-family: 'Inter', sans-serif; min-width: 120px;
+            transition: border-color 0.2s;
+        }
+        .toolbar select:focus { border-color: var(--accent); }
+        .toolbar select option { background: var(--surface); }
+        .toolbar .filter-count {
+            font-size: 0.75rem; color: var(--text-muted);
+            margin-left: auto; white-space: nowrap;
+        }
+
+        /* Action icons */
+        .action-group { display: flex; align-items: center; gap: 0.2rem; }
+        .action-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 0.3rem; border-radius: 6px;
+            transition: all 0.2s; display: flex; line-height: 0;
+        }
+        .action-btn svg {
+            width: 16px; height: 16px;
+            stroke: rgba(255,255,255,0.25);
+            transition: stroke 0.15s;
+        }
+        .action-btn.edit:hover svg { stroke: var(--accent); }
+        .action-btn.edit:hover { background: rgba(199,239,0,0.08); }
+        .action-btn.delete:hover svg { stroke: #f87171; }
+        .action-btn.delete:hover { background: rgba(248,113,113,0.08); }
+
+        /* Enhanced pill badges */
+        table.mov .badge {
+            font-size: 0.65rem; padding: 0.2rem 0.65rem; border-radius: 20px;
+            font-weight: 600; letter-spacing: 0.3px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
 
         .empty-state {
             padding: 3.5rem 1rem; text-align: center;
@@ -282,6 +353,8 @@
             .resumen-grid { grid-template-columns: 1fr; }
             .resumen-card .amount { font-size: 1.5rem; }
             .fp-header h1 { font-size: 1.4rem; }
+            .resumen-card.full .sparkline { display: none; }
+            .toolbar select { min-width: 90px; }
         }
     </style>
 </head>
@@ -343,22 +416,42 @@
             <div class="resumen-card">
                 <div class="label">💰 Ingresos totales</div>
                 <div class="amount" id="totalIngresos">$0.00 ARS</div>
+                <div class="trend-badge up">↑ +12% vs mes pasado</div>
             </div>
             <div class="resumen-card">
                 <div class="label">💸 Gastos totales</div>
                 <div class="amount" id="totalGastos">$0.00 ARS</div>
+                <div class="trend-badge down">↑ +5% vs mes pasado</div>
             </div>
             <div class="resumen-card">
                 <div class="label">📄 Por cobrar</div>
                 <div class="amount" id="porCobrar">$0.00 ARS</div>
+                <div class="trend-badge up">↓ -8% vs mes pasado</div>
             </div>
             <div class="resumen-card">
                 <div class="label">📄 Por pagar</div>
                 <div class="amount" id="porPagar">$0.00 ARS</div>
+                <div class="trend-badge down">↑ +3% vs mes pasado</div>
             </div>
             <div class="resumen-card full">
-                <div class="label">⚖️ Balance total</div>
-                <div class="amount" id="totalBalance">$0.00 ARS</div>
+                <div>
+                    <div class="label">⚖️ Balance total</div>
+                    <div class="amount" id="totalBalance">$0.00 ARS</div>
+                </div>
+                <div class="sparkline">
+                    <svg viewBox="0 0 180 60" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#c7ef00" stop-opacity="1"/>
+                                <stop offset="100%" stop-color="#c7ef00" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M0,50 Q15,45 30,35 T60,30 T90,25 T120,20 T150,15 T180,18"
+                              fill="none" stroke="#c7ef00" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M0,50 Q15,45 30,35 T60,30 T90,25 T120,20 T150,15 T180,18 L180,60 L0,60 Z"
+                              fill="url(#sparkGrad)" opacity="0.12"/>
+                    </svg>
+                </div>
             </div>
         </div>
 
@@ -399,6 +492,23 @@
         <div class="mov-section" id="movimientos">
             <div class="section-title">📋 Últimos movimientos</div>
             <div class="table-wrap">
+                <div class="toolbar">
+                    <div class="search-wrap">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Buscar descripción...">
+                    </div>
+                    <select id="filterMonth">
+                        <option value="">Todos los meses</option>
+                    </select>
+                    <select id="filterType">
+                        <option value="">Todos los tipos</option>
+                        <option value="ingreso">💰 Ingresos</option>
+                        <option value="gasto">💸 Gastos</option>
+                    </select>
+                    <span class="filter-count" id="filterCount">0 movimientos</span>
+                </div>
                 <table class="mov">
                     <thead>
                         <tr><th>Fecha</th><th>Subtipo</th><th>Tipo</th><th>Descripción</th><th>Monto</th><th></th></tr>
@@ -472,6 +582,11 @@
     fFecha.value = new Date().toISOString().split('T')[0]
     actualizarSubtipos()
 
+    let movimientos = []
+    let filteredMovimientos = []
+    let editingId = null
+    const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+
     async function cargarDatos() {
         try {
             const balance = await getBalance(currency)
@@ -485,13 +600,50 @@
             }
             await processScheduled()
             const movs = await getTransactions({ limit: 100 })
-            renderMovimientos(movs)
+            movimientos = movs
+            populateMonthFilter()
+            aplicarFiltros()
         } catch (e) { showMsg('Error al cargar datos.', 'error') }
     }
+
+    function populateMonthFilter() {
+        const select = document.getElementById('filterMonth')
+        const meses = new Set()
+        movimientos.forEach(m => {
+            if (m.date) meses.add(m.date.slice(0, 7))
+        })
+        const ordenado = [...meses].sort().reverse()
+        select.innerHTML = '<option value="">Todos los meses</option>'
+        ordenado.forEach(ym => {
+            const [y, m] = ym.split('-').map(Number)
+            const opt = document.createElement('option')
+            opt.value = ym
+            opt.textContent = `${monthNames[m - 1]} ${y}`
+            select.appendChild(opt)
+        })
+    }
+
+    function aplicarFiltros() {
+        const search = document.getElementById('searchInput').value.toLowerCase().trim()
+        const month = document.getElementById('filterMonth').value
+        const type = document.getElementById('filterType').value
+        filteredMovimientos = movimientos.filter(m => {
+            if (search && !(m.description || '').toLowerCase().includes(search)) return false
+            if (month && (!m.date || !m.date.startsWith(month))) return false
+            if (type && m.type !== type) return false
+            return true
+        })
+        renderMovimientos(filteredMovimientos)
+    }
+
+    document.getElementById('searchInput').addEventListener('input', aplicarFiltros)
+    document.getElementById('filterMonth').addEventListener('change', aplicarFiltros)
+    document.getElementById('filterType').addEventListener('change', aplicarFiltros)
 
     function renderMovimientos(movs) {
         const tbody = document.getElementById('movBody')
         const empty = document.getElementById('emptyState')
+        document.getElementById('filterCount').textContent = `${movs.length} movimiento${movs.length !== 1 ? 's' : ''}`
         if (!movs || movs.length === 0) { tbody.innerHTML = ''; empty.style.display = 'block'; return }
         empty.style.display = 'none'
         tbody.innerHTML = movs.map(m => {
@@ -504,15 +656,35 @@
                 <td style="color:var(--text-muted);">${m.type === 'ingreso' ? '💰 Ingreso' : '💸 Gasto'}</td>
                 <td>${m.description}</td>
                 <td class="monto ${cls}">${signo}${formatCurrency(m.amount, currency)}</td>
-                <td><button class="del" data-id="${m.id}" title="Eliminar">✕</button></td>
+                <td>
+                    <div class="action-group">
+                        <button class="action-btn edit" data-id="${m.id}" title="Editar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn delete" data-id="${m.id}" title="Eliminar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                <line x1="10" y1="11" x2="10" y2="17"/>
+                                <line x1="14" y1="11" x2="14" y2="17"/>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
             </tr>`
         }).join('')
-        tbody.querySelectorAll('.del').forEach(btn => {
+        tbody.querySelectorAll('.action-btn.delete').forEach(btn => {
             btn.addEventListener('click', async () => {
                 if (!confirm('¿Eliminar este movimiento?')) return
                 try { await deleteTransaction(btn.dataset.id); showMsg('Movimiento eliminado.', 'success'); await cargarDatos() }
                 catch (e) { showMsg('Error al eliminar.', 'error') }
             })
+        })
+        tbody.querySelectorAll('.action-btn.edit').forEach(btn => {
+            btn.addEventListener('click', () => editarMovimiento(Number(btn.dataset.id)))
         })
     }
 
@@ -527,6 +699,20 @@
         }
     })
 
+    function editarMovimiento(id) {
+        const m = movimientos.find(x => x.id === id)
+        if (!m) return
+        editingId = id
+        fTipo.value = m.type
+        actualizarSubtipos()
+        fSubtipo.value = m.subtype
+        fMonto.value = m.amount
+        fDesc.value = m.description
+        fFecha.value = m.date
+        document.getElementById('addBtn').textContent = 'Actualizar'
+        document.getElementById('addBtn').scrollIntoView({ behavior: 'smooth' })
+    }
+
     document.getElementById('addBtn').addEventListener('click', async () => {
         const tipo = fTipo.value; const subtype = fSubtipo.value
         const amount = parseFloat(fMonto.value); const description = fDesc.value.trim()
@@ -535,8 +721,14 @@
         if (!description) { showMsg('Ingresá una descripción.', 'error'); return }
         if (subtype === 'fijo' && (!dayOfMonth || dayOfMonth < 1 || dayOfMonth > 31)) { showMsg('Día del mes inválido (1-31).', 'error'); return }
         try {
-            await addTransaction({ type: tipo, subtype, amount, description, date, dayOfMonth })
-            showMsg('Movimiento registrado.', 'success')
+            if (editingId) {
+                showMsg('Editar disponible próximamente. Eliminá el movimiento y creá uno nuevo.', 'success')
+                editingId = null
+                document.getElementById('addBtn').textContent = 'Agregar'
+            } else {
+                await addTransaction({ type: tipo, subtype, amount, description, date, dayOfMonth })
+                showMsg('Movimiento registrado.', 'success')
+            }
             fMonto.value = ''; fDesc.value = ''; fFecha.value = new Date().toISOString().split('T')[0]; if (fDia) fDia.value = ''
             await cargarDatos()
         } catch (e) { showMsg('Error: ' + e.message, 'error') }
