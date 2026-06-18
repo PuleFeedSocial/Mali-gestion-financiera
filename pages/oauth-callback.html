@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mali | Redirigiendo...</title>
+    <style>
+        body { margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; background:#2d2d2a; color:#fff; font-family:Inter,sans-serif; }
+        .spinner { width:32px; height:32px; border:3px solid rgba(255,255,255,0.1); border-top-color:#c7ef00; border-radius:50%; animation:spin .8s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg) } }
+        p { margin-top:1rem; color:rgba(255,255,255,0.6); font-size:0.9rem; }
+    </style>
+</head>
+<body>
+    <div style="text-align:center">
+        <div class="spinner"></div>
+        <p>Completando inicio de sesión...</p>
+    </div>
+    <script type="module">
+        import { getSession, ensureProfile, supabase } from '../script/auth.js'
+
+        async function handleCallback() {
+            const session = await getSession()
+            if (!session) {
+                window.location.href = 'acceder-formulario.html'
+                return
+            }
+            await ensureProfile(session.user)
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('setup_complete')
+                .eq('id', session.user.id)
+                .single()
+            window.location.href = profile?.setup_complete ? 'dashboard.html' : 'setup.html'
+        }
+
+        handleCallback()
+    </script>
+</body>
+</html>

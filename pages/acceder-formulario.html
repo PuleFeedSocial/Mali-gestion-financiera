@@ -78,7 +78,7 @@
     </div>
 
     <script type="module">
-        import { getSession, login, register } from '../script/auth.js'
+        import { getSession, login, register, loginWithGoogle } from '../script/auth.js'
 
         getSession().then(session => {
             if (session) window.location.href = 'dashboard.html'
@@ -105,6 +105,17 @@
                 btn.disabled = false
             }
         }
+
+        document.querySelectorAll('.social').forEach(el => {
+            el.addEventListener('click', async (e) => {
+                e.preventDefault()
+                try {
+                    await loginWithGoogle()
+                } catch (err) {
+                    showError('loginError', err.message || 'Error al conectar con Google.')
+                }
+            })
+        })
 
         document.getElementById('registerForm').addEventListener('submit', async function (e) {
             e.preventDefault()
