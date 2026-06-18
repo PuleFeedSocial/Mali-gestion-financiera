@@ -26,7 +26,7 @@ export async function getHabits() {
     .select('*')
     .in('habit_id', habits.map(h => h.id))
     .gte('date', weekStart)
-    .lte('date', weekEnd)
+    .lte('date', weekEndStr)
   if (logError) throw logError
 
   const logsByHabit = {}
