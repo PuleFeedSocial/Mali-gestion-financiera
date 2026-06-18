@@ -397,7 +397,7 @@
         if (!description) { showMsg('Ingresá una descripción.', 'error'); return }
 
         try {
-            await addTask({ date, type, description: desc, tag: document.getElementById('fTag').value })
+            await addTask({ date, type, description, tag: document.getElementById('fTag').value })
             showMsg('Tarea agregada.', 'success')
             document.getElementById('fDesc').value = ''
             document.getElementById('fFecha').value = new Date().toISOString().split('T')[0]
