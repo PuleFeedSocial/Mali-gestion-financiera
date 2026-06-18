@@ -150,6 +150,13 @@
         .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
         .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
 
+        .mobile-menu-btn {
+            display: none; align-items: center; justify-content: center;
+            width: 40px; height: 40px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 10px;
+            cursor: pointer; color: var(--text-primary); font-size: 1.2rem;
+            flex-shrink: 0;
+        }
         @media (max-width: 1200px) {
             .form-deuda { grid-template-columns: 1fr 1fr 1fr; }
         }
@@ -157,7 +164,29 @@
             .form-deuda { grid-template-columns: 1fr 1fr; }
             .resumen-grid { grid-template-columns: 1fr 1fr; }
         }
-        @media (max-width: 768px) { .d-sidebar { display: none; } .d-main { padding: 1.5rem; } .resumen-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: flex; }
+            .d-sidebar {
+                position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+                transform: translateX(-100%); transition: transform 0.3s ease;
+                width: 260px;
+            }
+            .d-sidebar.open { transform: translateX(0); }
+            .d-wrapper::before {
+                content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+                z-index: 99; display: none;
+            }
+            .d-wrapper.overlay::before { display: block; }
+            .d-main { padding: 1.5rem; max-height: none; }
+            .resumen-grid { grid-template-columns: 1fr; }
+            .form-deuda { grid-template-columns: 1fr; }
+            .table-wrap { overflow-x: auto; }
+            table.d-table { min-width: 800px; }
+        }
+        @media (max-width: 480px) {
+            .d-header h1 { font-size: 1.4rem; }
+            .resumen-card .amount { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -188,6 +217,7 @@
         <div class="d-header">
             <div>
                 <div class="breadcrumb">💳 Finanzas / <span>Deudas</span></div>
+                <button class="mobile-menu-btn" id="menuBtn">☰</button>
                 <h1>Deudas</h1>
             </div>
             <div class="user-dropdown" id="userDropdown">
@@ -208,19 +238,19 @@
         <div class="resumen-grid" id="resumenGrid">
             <div class="resumen-card">
                 <div class="label">💰 Por cobrar</div>
-                <div class="amount positive" id="porCobrar">$0.00</div>
+                <div class="amount positive" id="porCobrar">$0.00 ARS</div>
             </div>
             <div class="resumen-card">
                 <div class="label">💸 Por pagar</div>
-                <div class="amount negative" id="porPagar">$0.00</div>
+                <div class="amount negative" id="porPagar">$0.00 ARS</div>
             </div>
             <div class="resumen-card pendientes">
                 <div class="label">⏳ Pendientes</div>
-                <div class="amount" id="pendientesCount" style="font-size:1.3rem;color:var(--text-primary);">0</div>
+                <div class="amount" id="pendientesCount" style="font-size:1.3rem;color:var(--text-primary);">0 ARS</div>
             </div>
             <div class="resumen-card vencidas">
                 <div class="label">⚠️ Vencidas</div>
-                <div class="amount" id="vencidasCount" style="font-size:1.3rem;color:#ff6b6b;">0</div>
+                <div class="amount" id="vencidasCount" style="font-size:1.3rem;color:#ff6b6b;">0 ARS</div>
             </div>
         </div>
 
@@ -299,13 +329,14 @@
 </div>
 
 <script type="module">
-    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
+    import { requireAuth, getUserProfile, logout, formatCurrency } from '../script/auth.js'
     import { getBalance, addDebt, getDebts, payInstallment, updateDebtStatus, deleteDebt } from '../script/finanzas.js'
 
     const session = await requireAuth()
     if (!session) throw new Error()
 
     const profile = await getUserProfile()
+    const currency = profile?.currency || 'ARS'
     document.getElementById('userName').textContent = profile?.name || 'Usuario'
     document.getElementById('userAvatar').textContent = (profile?.name || 'U').charAt(0).toUpperCase()
     if (profile?.role === 'admin') {
@@ -318,6 +349,11 @@
     document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
 
+    document.getElementById('menuBtn')?.addEventListener('click', () => {
+        document.querySelector('.d-sidebar')?.classList.toggle('open')
+        document.querySelector('.d-wrapper')?.classList.toggle('overlay')
+    })
+
     const fm = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const msg = document.getElementById('dMsg')
     function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 3500) }
@@ -325,10 +361,10 @@
     document.getElementById('fFecha').value = new Date().toISOString().split('T')[0]
 
     async function cargarResumen() {
-        const balance = await getBalance()
+        const balance = await getBalance(currency)
         if (balance) {
-            document.getElementById('porCobrar').textContent = `$${fm(balance.por_cobrar)}`
-            document.getElementById('porPagar').textContent = `$${fm(balance.por_pagar)}`
+            document.getElementById('porCobrar').textContent = `${formatCurrency(balance.por_cobrar, currency)}`
+            document.getElementById('porPagar').textContent = `${formatCurrency(balance.por_pagar, currency)}`
         }
     }
 
@@ -397,7 +433,7 @@
                 <td>${d.type === 'por_cobrar' ? '💰 Cobrar' : '💸 Pagar'}</td>
                 <td>${d.debtor}</td>
                 <td style="color:var(--text-secondary);font-size:0.8rem;">${d.description || '-'}</td>
-                <td class="monto ${cls}">${signo}$${fm(totalAmt)}</td>
+                <td class="monto ${cls}">${signo}${formatCurrency(totalAmt, currency)}</td>
                 <td>
                     <div style="display:flex;align-items:center;gap:0.4rem;">
                         <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;min-width:50px;">
@@ -406,7 +442,7 @@
                         <span style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;">${paid}/${inst}</span>
                     </div>
                 </td>
-                <td class="monto ${cls}">${signo}$${fm(inst > 1 ? totalAmt / inst : totalAmt)}</td>
+                <td class="monto ${cls}">${signo}${formatCurrency(inst > 1 ? totalAmt / inst : totalAmt, currency)}</td>
                 <td><span class="badge ${estadoCls}">${estadoTxt}</span></td>
                 <td>${acciones}</td>
             </tr>`

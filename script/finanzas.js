@@ -43,7 +43,7 @@ async function hasInstallmentsColumn() {
   return _hasInstallments
 }
 
-export async function getBalance() {
+export async function getBalance(currency) {
   const session = await getSession()
   if (!session) return null
 
@@ -60,36 +60,18 @@ export async function getBalance() {
   if (txData.error) throw txData.error
   if (debtData.error) throw debtData.error
 
-  const total = { ingresos: 0, gastos: 0, por_cobrar: 0, por_pagar: 0 }
+  const total = { ingresos: 0, gastos: 0, por_cobrar: 0, por_pagar: 0, currency }
   for (const t of txData.data) {
     if (t.type === 'ingreso') total.ingresos += Number(t.amount)
     else total.gastos += Number(t.amount)
   }
   for (const d of debtData.data) {
-    const remaining = hasInst ? Number(d.amount) : Number(d.amount)
+    const remaining = Number(d.amount)
     if (d.type === 'por_cobrar') total.por_cobrar += remaining
     else total.por_pagar += remaining
   }
   total.balance = total.ingresos - total.gastos + total.por_cobrar - total.por_pagar
   return total
-}
-
-async function insertDebt(data) {
-  const hasInst = await hasInstallmentsColumn()
-  if (hasInst) {
-    const { error } = await supabase.from('debts').insert(data)
-    if (error) throw error
-  } else {
-    const { error } = await supabase.from('debts').insert({
-      user_id: data.user_id,
-      type: data.type,
-      debtor: data.debtor,
-      amount: data.amount,
-      description: data.description,
-      due_date: data.due_date
-    })
-    if (error) throw error
-  }
 }
 
 export async function addTransaction({ type, subtype, amount, description, date, dayOfMonth }) {
@@ -254,6 +236,18 @@ export async function addDebt({ type, debtor, amount, description, dueDate, inst
     })
     if (error) throw error
   }
+
+  // Registrar en movimientos
+  const txType = type === 'por_cobrar' ? 'ingreso' : 'gasto'
+  const txSub = type === 'por_cobrar' ? 'instantaneo' : 'variable'
+  await supabase.from('transactions').insert({
+    user_id: session.user.id,
+    type: txType,
+    subtype: txSub,
+    amount: total,
+    description: `${type === 'por_cobrar' ? 'Préstamo otorgado' : 'Deuda contraída'}: ${debtor}${description ? ' - ' + description : ''}`,
+    date: dueDate || new Date().toISOString().split('T')[0]
+  })
 }
 
 export async function getDebts({ status, type } = {}) {
@@ -449,6 +443,15 @@ export async function updateDebtStatus(id, newStatus) {
       subtype: 'variable',
       amount: remaining,
       description: `Pago total: ${debt.debtor} - ${cleanDesc}`,
+      date: new Date().toISOString().split('T')[0]
+    })
+  } else if (newStatus === 'cancelado') {
+    await supabase.from('transactions').insert({
+      user_id: session.user.id,
+      type: debt.type === 'por_cobrar' ? 'gasto' : 'ingreso',
+      subtype: 'instantaneo',
+      amount: remaining,
+      description: `Cancelación: ${debt.debtor} - ${cleanDesc}`,
       date: new Date().toISOString().split('T')[0]
     })
   }

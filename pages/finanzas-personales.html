@@ -252,11 +252,36 @@
         @media (max-width: 1100px) {
             .add-grid { grid-template-columns: 1fr 1fr; }
         }
+        .mobile-menu-btn {
+            display: none; align-items: center; justify-content: center;
+            width: 40px; height: 40px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 10px;
+            cursor: pointer; color: var(--text-primary); font-size: 1.2rem;
+            flex-shrink: 0;
+        }
         @media (max-width: 768px) {
-            .fp-sidebar { display: none; }
-            .fp-main { padding: 1.5rem; }
+            .mobile-menu-btn { display: flex; }
+            .fp-sidebar {
+                position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+                transform: translateX(-100%); transition: transform 0.3s ease;
+                width: 260px;
+            }
+            .fp-sidebar.open { transform: translateX(0); }
+            .fp-wrapper::before {
+                content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+                z-index: 99; display: none;
+            }
+            .fp-wrapper.overlay::before { display: block; }
+            .fp-main { padding: 1.5rem; max-height: none; }
             .resumen-grid { grid-template-columns: 1fr 1fr; }
             .add-grid { grid-template-columns: 1fr; }
+            .table-wrap { overflow-x: auto; }
+            table.mov { min-width: 600px; }
+        }
+        @media (max-width: 480px) {
+            .resumen-grid { grid-template-columns: 1fr; }
+            .resumen-card .amount { font-size: 1.5rem; }
+            .fp-header h1 { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -288,6 +313,7 @@
         <div class="fp-header">
             <div>
                 <div class="breadcrumb">💰 Finanzas / <span>Finanzas personales</span></div>
+                <button class="mobile-menu-btn" id="menuBtn">☰</button>
                 <h1>Finanzas Personales</h1>
             </div>
             <div class="user-area">
@@ -310,23 +336,23 @@
         <div class="resumen-grid">
             <div class="resumen-card">
                 <div class="label">💰 Ingresos totales</div>
-                <div class="amount" id="totalIngresos">$0.00</div>
+                <div class="amount" id="totalIngresos">$0.00 ARS</div>
             </div>
             <div class="resumen-card">
                 <div class="label">💸 Gastos totales</div>
-                <div class="amount" id="totalGastos">$0.00</div>
+                <div class="amount" id="totalGastos">$0.00 ARS</div>
             </div>
             <div class="resumen-card">
                 <div class="label">📄 Por cobrar</div>
-                <div class="amount" id="porCobrar">$0.00</div>
+                <div class="amount" id="porCobrar">$0.00 ARS</div>
             </div>
             <div class="resumen-card">
                 <div class="label">📄 Por pagar</div>
-                <div class="amount" id="porPagar">$0.00</div>
+                <div class="amount" id="porPagar">$0.00 ARS</div>
             </div>
             <div class="resumen-card full">
                 <div class="label">⚖️ Balance total</div>
-                <div class="amount" id="totalBalance">$0.00</div>
+                <div class="amount" id="totalBalance">$0.00 ARS</div>
             </div>
         </div>
 
@@ -389,13 +415,14 @@
 </div>
 
 <script type="module">
-    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
+    import { requireAuth, getUserProfile, logout, formatCurrency } from '../script/auth.js'
     import { getBalance, addTransaction, getTransactions, deleteTransaction, processScheduled } from '../script/finanzas.js'
 
     const session = await requireAuth()
     if (!session) throw new Error()
 
     const profile = await getUserProfile()
+    const currency = profile?.currency || 'ARS'
     if (profile) {
         if (!profile.setup_complete) { window.location.href = 'setup.html'; throw new Error() }
         document.getElementById('userName').textContent = profile.name
@@ -441,14 +468,14 @@
 
     async function cargarDatos() {
         try {
-            const balance = await getBalance()
+            const balance = await getBalance(currency)
             if (balance) {
-                document.getElementById('totalIngresos').textContent = `$${fm(balance.ingresos)}`
-                document.getElementById('totalGastos').textContent = `$${fm(balance.gastos)}`
-                document.getElementById('porCobrar').textContent = `$${fm(balance.por_cobrar)}`
-                document.getElementById('porPagar').textContent = `$${fm(balance.por_pagar)}`
+                document.getElementById('totalIngresos').textContent = formatCurrency(balance.ingresos, currency)
+                document.getElementById('totalGastos').textContent = formatCurrency(balance.gastos, currency)
+                document.getElementById('porCobrar').textContent = formatCurrency(balance.por_cobrar, currency)
+                document.getElementById('porPagar').textContent = formatCurrency(balance.por_pagar, currency)
                 const bEl = document.getElementById('totalBalance')
-                bEl.textContent = `$${fm(balance.balance)}`
+                bEl.textContent = formatCurrency(balance.balance, currency)
             }
             await processScheduled()
             const movs = await getTransactions({ limit: 100 })
@@ -470,7 +497,7 @@
                 <td><span class="badge ${m.subtype}">${m.subtype}</span></td>
                 <td style="color:var(--text-muted);">${m.type === 'ingreso' ? '💰 Ingreso' : '💸 Gasto'}</td>
                 <td>${m.description}</td>
-                <td class="monto ${cls}">${signo}$${fm(m.amount)}</td>
+                <td class="monto ${cls}">${signo}${formatCurrency(m.amount, currency)}</td>
                 <td><button class="del" data-id="${m.id}" title="Eliminar">✕</button></td>
             </tr>`
         }).join('')
@@ -482,6 +509,17 @@
             })
         })
     }
+
+    document.getElementById('menuBtn')?.addEventListener('click', () => {
+        document.querySelector('.fp-sidebar')?.classList.toggle('open')
+        document.querySelector('.fp-wrapper')?.classList.toggle('overlay')
+    })
+    document.querySelector('.fp-wrapper')?.addEventListener('click', (e) => {
+        if (e.target === document.querySelector('.fp-wrapper') || (e.target.classList.contains('fp-wrapper') && window.innerWidth <= 768)) {
+            document.querySelector('.fp-sidebar')?.classList.remove('open')
+            document.querySelector('.fp-wrapper')?.classList.remove('overlay')
+        }
+    })
 
     document.getElementById('addBtn').addEventListener('click', async () => {
         const tipo = fTipo.value; const subtype = fSubtipo.value

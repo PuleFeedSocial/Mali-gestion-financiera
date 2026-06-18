@@ -190,4 +190,9 @@ export async function updateProfile(data) {
   if (error) throw error
 }
 
+export function formatCurrency(amount, currency) {
+  const n = Number(amount).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return `$${n} ${currency || 'ARS'}`
+}
+
 export { supabase }

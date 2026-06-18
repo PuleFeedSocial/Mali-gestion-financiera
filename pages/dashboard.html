@@ -129,10 +129,31 @@
         .welcome-card .status.active { color: var(--accent); }
         .welcome-card .status.inactive { color: rgba(255,255,255,0.25); }
 
+        .mobile-menu-btn {
+            display: none; align-items: center; justify-content: center;
+            width: 40px; height: 40px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 10px;
+            cursor: pointer; color: var(--text-primary); font-size: 1.2rem;
+            flex-shrink: 0;
+        }
         @media (max-width: 768px) {
-            .dash-sidebar { display: none; }
+            .mobile-menu-btn { display: flex; }
+            .dash-sidebar {
+                position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+                transform: translateX(-100%); transition: transform 0.3s ease;
+                width: 260px;
+            }
+            .dash-sidebar.open { transform: translateX(0); }
+            .dash-wrapper::before {
+                content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+                z-index: 99; display: none;
+            }
+            .dash-wrapper.overlay::before { display: block; }
             .dash-main { padding: 1.5rem; }
             .welcome-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+            .dash-header h1 { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -167,6 +188,7 @@
         <div class="dash-header">
             <div>
                 <div class="breadcrumb">📊 <span>Panel principal</span></div>
+                <button class="mobile-menu-btn" id="menuBtn">☰</button>
                 <h1>Bienvenido a Mali</h1>
             </div>
             <div class="user-area">
@@ -218,12 +240,13 @@
 </div>
 
 <script type="module">
-    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
+    import { requireAuth, getUserProfile, logout, formatCurrency } from '../script/auth.js'
 
     const session = await requireAuth()
     if (!session) throw new Error()
 
     const profile = await getUserProfile()
+    const currency = profile?.currency || 'ARS'
     if (profile) {
         if (!profile.setup_complete) { window.location.href = 'setup.html'; throw new Error() }
         document.getElementById('userName').textContent = profile.name
@@ -245,6 +268,11 @@
 
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault(); logout()
+    })
+
+    document.getElementById('menuBtn')?.addEventListener('click', () => {
+        document.querySelector('.dash-sidebar')?.classList.toggle('open')
+        document.querySelector('.dash-wrapper')?.classList.toggle('overlay')
     })
 </script>
 </body>
