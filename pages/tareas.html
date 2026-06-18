@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mali | Tareas</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: #1f1f1d;
+            --border: rgba(255,255,255,0.08);
+            --radius: 16px;
+        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-primary); }
+        .t-wrapper { display: flex; min-height: 100vh; }
+        .t-sidebar {
+            width: 240px; background: var(--bg-color);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0; flex-shrink: 0;
+        }
+        .t-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px; }
+        .t-sidebar .logo span { color: var(--accent); }
+        .t-sidebar nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 0.65rem 1.5rem; color: var(--text-secondary);
+            text-decoration: none; font-size: 0.9rem;
+            transition: all 0.2s; border-radius: 8px; margin: 0 0.5rem;
+        }
+        .t-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.08); }
+        .t-sidebar nav a.active { color: var(--accent); background: rgba(199,239,0,0.1); font-weight: 500; }
+        .t-sidebar .nav-label { padding: 1.2rem 1.5rem 0.4rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); font-weight: 600; }
+        .t-sidebar .nav-group { position: relative; }
+        .t-sidebar .nav-group::before {
+            content: ''; position: absolute; left: 2.3rem;
+            top: 2.2rem; bottom: 0.8rem;
+            width: 1px; background: var(--border);
+        }
+        .t-sidebar .nav-group:last-of-type::before { bottom: 50%; }
+        .t-sidebar nav a.sub {
+            padding-left: 3.2rem; font-size: 0.85rem;
+            position: relative;
+        }
+        .t-sidebar nav a.sub::before {
+            content: ''; position: absolute; left: -0.9rem; top: 50%;
+            width: 0.7rem; height: 1px; background: var(--border);
+        }
+        .t-main { flex: 1; padding: 2.5rem 3rem; overflow-y: auto; max-height: 100vh; }
+        .t-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .t-header .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; letter-spacing: 0.3px; }
+        .t-header .breadcrumb span { color: var(--accent); }
+        .t-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin: 0; }
+
+        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .user-dropdown .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--bg-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; }
+        .user-dropdown .name { font-size: 0.9rem; font-weight: 600; }
+        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; margin-left: 0.3rem; }
+        .user-dropdown.open .arrow { transform: rotate(180deg); }
+        .user-dropdown-menu { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.5rem; min-width: 200px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200; }
+        .user-dropdown.open .user-dropdown-menu { display: block; }
+        .user-dropdown-menu a { display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0.8rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: all 0.15s; }
+        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .user-dropdown-menu .divider { height: 1px; background: var(--border); margin: 0.3rem 0.5rem; }
+        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
+        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
+        .section-card {
+            background: var(--surface); border-radius: var(--radius);
+            border: 1px solid var(--border); padding: 1.6rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        .form-tarea {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr auto;
+            gap: 0.8rem; align-items: end;
+        }
+        .form-tarea .field { display: flex; flex-direction: column; gap: 0.3rem; }
+        .form-tarea .field label { font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.3px; }
+        .form-tarea select, .form-tarea input {
+            background: rgba(255,255,255,0.05); border: none; border-bottom: 1px solid var(--border);
+            color: var(--text-primary); padding: 0.6rem 0.5rem;
+            font-size: 0.85rem; font-family: 'Inter', sans-serif; outline: none;
+            border-radius: 0; transition: border-color 0.2s;
+        }
+        .form-tarea select:focus, .form-tarea input:focus { border-bottom-color: var(--accent); }
+        .form-tarea select option { background: var(--surface); color: white; }
+        .form-tarea .btn-add {
+            background: var(--accent); color: var(--bg-color);
+            border: none; padding: 0.6rem 1.5rem;
+            border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .form-tarea .btn-add:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .filtros-tabs {
+            display: flex; gap: 0.5rem; flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+        .filtros-tabs .tab {
+            padding: 0.35rem 0.9rem; border-radius: 6px;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--text-secondary); font-size: 0.78rem; cursor: pointer;
+            transition: all 0.2s; font-family: 'Inter', sans-serif; font-weight: 500;
+        }
+        .filtros-tabs .tab:hover { border-color: var(--accent); color: var(--accent); }
+        .filtros-tabs .tab.active { background: rgba(199,239,0,0.1); border-color: var(--accent); color: var(--accent); }
+
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        table.t-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        table.t-table th { text-align: left; padding: 1rem 1.2rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+        table.t-table td { padding: 0.7rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        table.t-table tr:last-child td { border-bottom: none; }
+        table.t-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .status-btn {
+            padding: 0.25rem 0.55rem; border-radius: 4px; border: 1px solid var(--border);
+            background: transparent; color: var(--text-secondary); cursor: pointer;
+            font-size: 0.65rem; transition: all 0.15s; margin-right: 0.2rem; font-family: 'Inter', sans-serif;
+        }
+        .status-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .status-btn.active-por_hacer { background: rgba(255,165,0,0.15); border-color: #ffa500; color: #ffa500; }
+        .status-btn.active-en_progreso { background: rgba(100,200,255,0.15); border-color: #64c8ff; color: #64c8ff; }
+        .status-btn.active-en_pausa { background: rgba(255,255,255,0.08); border-color: var(--text-secondary); color: var(--text-secondary); }
+        .status-btn.active-realizado { background: rgba(199,239,0,0.15); border-color: var(--accent); color: var(--accent); }
+        .badge-tipo {
+            font-size: 0.65rem; padding: 0.2rem 0.55rem; border-radius: 4px;
+            font-weight: 600;
+        }
+        .badge-tipo.tarea { background: rgba(199,239,0,0.1); color: var(--accent); }
+        .badge-tipo.evento { background: rgba(100,200,255,0.1); color: #64c8ff; }
+        .del-btn {
+            background: none; border: none; color: rgba(255,255,255,0.15);
+            cursor: pointer; font-size: 1rem; padding: 0.2rem; transition: color 0.2s;
+        }
+        .del-btn:hover { color: #ff6b6b; }
+        .edit-btn {
+            background: none; border: none; color: rgba(255,255,255,0.15);
+            cursor: pointer; font-size: 0.85rem; padding: 0.2rem; margin-right: 0.3rem; transition: color 0.2s;
+        }
+        .edit-btn:hover { color: var(--accent); }
+        .empty-state { padding: 3rem 1rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+
+        .msg { padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+        .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
+
+        .mobile-menu-btn { display: none; align-items: center; justify-content: center; width: 40px; height: 40px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; color: var(--text-primary); font-size: 1.2rem; flex-shrink: 0; }
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: flex; }
+            .t-sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease; width: 260px; }
+            .t-sidebar.open { transform: translateX(0); }
+            .t-wrapper::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+            .t-wrapper.overlay::before { display: block; }
+            .t-main { padding: 1.5rem; max-height: none; }
+            .form-tarea { grid-template-columns: 1fr; }
+            .table-wrap { overflow-x: auto; }
+            table.t-table { min-width: 600px; }
+        }
+        @media (max-width: 480px) {
+            .t-header h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="t-wrapper">
+    <aside class="t-sidebar">
+        <div class="logo">Mali<span>.</span></div>
+        <nav>
+            <div class="nav-label">General</div>
+            <a href="dashboard.html">📊 Panel principal</a>
+            <div class="nav-label">Finanzas</div>
+            <div class="nav-group">
+                <a href="finanzas-personales.html">💰 Finanzas personales</a>
+                <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            </div>
+            <a href="deudas.html">💳 Deudas</a>
+            <a href="#" style="opacity:0.4;pointer-events:none;">📈 Inversiones</a>
+            <div class="nav-label">Organización</div>
+            <div class="nav-group">
+                <a href="tareas.html" class="active">✅ Tareas</a>
+                <a href="#" class="sub" style="opacity:0.4;pointer-events:none;">📅 Calendario</a>
+                <a href="#" class="sub" style="opacity:0.4;pointer-events:none;">🔥 Hábitos</a>
+                <a href="#" class="sub" style="opacity:0.4;pointer-events:none;">👥 Grupal</a>
+            </div>
+            <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
+            <div class="nav-group" id="adminGroup" style="display:none;">
+                <a href="admin.html" class="sub">⚙️ Panel admin</a>
+            </div>
+            <div class="nav-label">Próximamente</div>
+            <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
+        </nav>
+    </aside>
+
+    <main class="t-main">
+        <div class="t-header">
+            <div>
+                <div class="breadcrumb">📁 Organización / <span>Tareas</span></div>
+                <button class="mobile-menu-btn" id="menuBtn">☰</button>
+                <h1>Tareas</h1>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="avatar" id="userAvatar">M</div>
+                <span class="name" id="userName">Cargando...</span>
+                <span class="arrow">▼</span>
+                <div class="user-dropdown-menu">
+                    <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                    <a href="preferencias.html">🎨 Preferencias</a>
+                    <div class="divider"></div>
+                    <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="tMsg" class="msg"></div>
+
+        <div class="section-card">
+            <div class="section-title">➕ Nueva tarea / evento</div>
+            <div class="form-tarea">
+                <div class="field">
+                    <label>Fecha</label>
+                    <input type="date" id="fFecha">
+                </div>
+                <div class="field">
+                    <label>Tipo</label>
+                    <select id="fTipo">
+                        <option value="tarea">Tarea</option>
+                        <option value="evento">Evento</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Descripción</label>
+                    <input type="text" id="fDesc" placeholder="Ej: Estudiar JavaScript, Reunión equipo...">
+                </div>
+                <div class="field">
+                    <label>&nbsp;</label>
+                    <button class="btn-add" id="addBtn">Agregar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+                <span>📋 Mis tareas</span>
+            </div>
+            <div class="filtros-tabs">
+                <button class="tab active" data-filter="todas">📋 Todas</button>
+                <button class="tab" data-filter="pendientes">⏳ Pendientes</button>
+                <button class="tab" data-filter="realizado">✅ Realizadas</button>
+            </div>
+            <div class="table-wrap">
+                <table class="t-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksBody">
+                        <tr><td colspan="5" class="empty-state">No hay tareas registradas.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, logout, formatCurrency } from '../script/auth.js'
+    import { getTasks, addTask, updateTaskStatus, updateTask, deleteTask } from '../script/tareas.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    if (profile) {
+        if (!profile.setup_complete) { window.location.href = 'setup.html'; throw new Error() }
+        document.getElementById('userName').textContent = profile.name
+        document.getElementById('userAvatar').textContent = profile.name.charAt(0).toUpperCase()
+        if (profile.role === 'admin') {
+            document.getElementById('adminLabel').style.display = 'block'
+            document.getElementById('adminGroup').style.display = 'block'
+        }
+    }
+
+    const currency = profile?.currency || 'ARS'
+    const msg = document.getElementById('tMsg')
+    let currentFilter = 'todas'
+    function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 3500) }
+
+    document.getElementById('fFecha').value = new Date().toISOString().split('T')[0]
+
+    async function cargarTareas() {
+        try {
+            let tareas
+            if (currentFilter === 'todas') {
+                tareas = await getTasks()
+            } else if (currentFilter === 'realizado') {
+                tareas = await getTasks({ status: 'realizado' })
+            } else {
+                tareas = await getTasks()
+                tareas = tareas.filter(t => t.status !== 'realizado')
+            }
+            renderTareas(tareas)
+        } catch (e) { showMsg('Error al cargar tareas.', 'error') }
+    }
+
+    function renderTareas(tareas) {
+        const tbody = document.getElementById('tasksBody')
+        if (!tareas || tareas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay tareas registradas.</td></tr>'
+            return
+        }
+        tbody.innerHTML = tareas.map(t => {
+            const fecha = t.date ? new Date(t.date + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'
+            const badges = ['por_hacer', 'en_progreso', 'en_pausa', 'realizado'].map(s => {
+                const labels = { por_hacer: 'H', en_progreso: 'P', en_pausa: 'Pausa', realizado: 'Hecho' }
+                const active = t.status === s
+                return `<button class="status-btn${active ? ' active-' + s : ''}" onclick="cambiarEstado(${t.id}, '${s}')" title="${s.replace(/_/g, ' ')}">${labels[s]}</button>`
+            }).join('')
+            return `<tr>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${fecha}</td>
+                <td><span class="badge-tipo ${t.type}">${t.type === 'tarea' ? '📋 Tarea' : '📅 Evento'}</span></td>
+                <td>${t.description}</td>
+                <td><div style="display:flex;gap:0.3rem;flex-wrap:wrap;">${badges}</div></td>
+                <td style="text-align:right;">
+                    <button class="edit-btn" onclick="editarTarea(${t.id})" title="Editar">✏️</button>
+                    <button class="del-btn" onclick="eliminarTarea(${t.id})" title="Eliminar">✕</button>
+                </td>
+            </tr>`
+        }).join('')
+    }
+
+    window.cambiarEstado = async function(id, status) {
+        try {
+            await updateTaskStatus(id, status)
+            showMsg('Estado actualizado.', 'success')
+            await cargarTareas()
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    }
+
+    window.eliminarTarea = async function(id) {
+        if (!confirm('¿Eliminar esta tarea?')) return
+        try {
+            await deleteTask(id)
+            showMsg('Tarea eliminada.', 'success')
+            await cargarTareas()
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    }
+
+    window.editarTarea = async function(id) {
+        const desc = prompt('Nueva descripción:')
+        if (!desc || desc.trim() === '') return
+        try {
+            await updateTask(id, { date: new Date().toISOString().split('T')[0], type: 'tarea', description: desc.trim() })
+            showMsg('Tarea actualizada.', 'success')
+            await cargarTareas()
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    }
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        const date = document.getElementById('fFecha').value
+        const type = document.getElementById('fTipo').value
+        const description = document.getElementById('fDesc').value.trim()
+
+        if (!date) { showMsg('Seleccioná una fecha.', 'error'); return }
+        if (!description) { showMsg('Ingresá una descripción.', 'error'); return }
+
+        try {
+            await addTask({ date, type, description })
+            showMsg('Tarea agregada.', 'success')
+            document.getElementById('fDesc').value = ''
+            document.getElementById('fFecha').value = new Date().toISOString().split('T')[0]
+            await cargarTareas()
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    })
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+            tab.classList.add('active')
+            currentFilter = tab.dataset.filter
+            cargarTareas()
+        })
+    })
+
+    const dd = document.getElementById('userDropdown')
+    dd.addEventListener('click', (e) => { if (e.target.closest('.user-dropdown-menu')) return; dd.classList.toggle('open') })
+    document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
+    document.getElementById('menuBtn')?.addEventListener('click', () => {
+        document.querySelector('.t-sidebar')?.classList.toggle('open')
+        document.querySelector('.t-wrapper')?.classList.toggle('overlay')
+    })
+
+    await cargarTareas()
+</script>
+</body>
+</html>
