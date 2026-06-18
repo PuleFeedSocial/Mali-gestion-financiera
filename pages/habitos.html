@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mali | Hábitos</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: #1f1f1d;
+            --border: rgba(255,255,255,0.08);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-primary); }
+        .h-wrapper { display: flex; min-height: 100vh; }
+        .h-sidebar {
+            width: 240px; background: var(--bg-color);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0; flex-shrink: 0;
+        }
+        .h-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px; }
+        .h-sidebar .logo span { color: var(--accent); }
+        .h-sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 0.65rem 1.5rem; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; transition: all 0.2s; border-radius: 8px; margin: 0 0.5rem; }
+        .h-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.08); }
+        .h-sidebar nav a.active { color: var(--accent); background: rgba(199,239,0,0.1); font-weight: 500; }
+        .h-sidebar .nav-label { padding: 1.2rem 1.5rem 0.4rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); font-weight: 600; }
+        .h-sidebar .nav-group { position: relative; }
+        .h-sidebar .nav-group::before { content: ''; position: absolute; left: 2.3rem; top: 2.2rem; bottom: 0.8rem; width: 1px; background: var(--border); }
+        .h-sidebar .nav-group:last-of-type::before { bottom: 50%; }
+        .h-sidebar nav a.sub { padding-left: 3.2rem; font-size: 0.85rem; position: relative; }
+        .h-sidebar nav a.sub::before { content: ''; position: absolute; left: -0.9rem; top: 50%; width: 0.7rem; height: 1px; background: var(--border); }
+
+        .h-main { flex: 1; padding: 2.5rem 3rem; overflow-y: auto; max-height: 100vh; }
+        .h-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .h-header .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.2rem; letter-spacing: 0.3px; }
+        .h-header .breadcrumb span { color: var(--accent); }
+        .h-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin: 0; }
+
+        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .user-dropdown .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--bg-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; }
+        .user-dropdown .name { font-size: 0.9rem; font-weight: 600; }
+        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; margin-left: 0.3rem; }
+        .user-dropdown.open .arrow { transform: rotate(180deg); }
+        .user-dropdown-menu { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.5rem; min-width: 200px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200; }
+        .user-dropdown.open .user-dropdown-menu { display: block; }
+        .user-dropdown-menu a { display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0.8rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: all 0.15s; }
+        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .user-dropdown-menu .divider { height: 1px; background: var(--border); margin: 0.3rem 0.5rem; }
+        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
+        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
+        .btn-cta {
+            background: var(--accent); color: var(--bg-color); border: none;
+            padding: 0.55rem 1.4rem; border-radius: 10px; font-weight: 600;
+            font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+            font-family: 'Inter', sans-serif; white-space: nowrap;
+        }
+        .btn-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .board-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .habit-row {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s;
+        }
+        .habit-row:last-child { border-bottom: none; }
+        .habit-row:hover { background: rgba(255,255,255,0.015); }
+
+        .habit-left { flex: 1; min-width: 0; }
+        .habit-icon { font-size: 1.3rem; margin-right: 0.5rem; }
+        .habit-name { font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 0.3rem; }
+        .habit-streak {
+            font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.2rem;
+            display: flex; align-items: center; gap: 0.25rem;
+        }
+        .habit-streak .fire { color: #fb923c; }
+
+        .habit-tracker {
+            display: flex; align-items: center; gap: 0.35rem;
+            flex-shrink: 0;
+        }
+        .day-label {
+            font-size: 0.6rem; color: var(--text-secondary); font-weight: 600;
+            text-align: center; width: 14px; margin-bottom: 0.2rem;
+        }
+        .day-cell {
+            width: 32px; height: 32px; border-radius: 8px;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+        }
+        .day-cell.day-empty {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .day-cell.day-empty:hover {
+            background: rgba(199,239,0,0.08);
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+        .day-cell.day-done {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: var(--bg-color);
+        }
+        .day-cell.day-done::after { content: '✓'; font-weight: 700; font-size: 0.75rem; }
+        .day-cell.day-future { opacity: 0.3; cursor: default; }
+        .day-cell.day-future:hover { transform: none; background: transparent; border-color: rgba(255,255,255,0.1); }
+
+        .habit-actions {
+            display: flex; align-items: center; gap: 0.2rem; margin-left: 0.5rem;
+        }
+        .habit-actions button {
+            background: none; border: none; cursor: pointer;
+            padding: 0.25rem; border-radius: 4px; transition: all 0.15s;
+            display: flex; line-height: 0;
+        }
+        .habit-actions button svg { width: 14px; height: 14px; stroke: rgba(255,255,255,0.2); transition: stroke 0.15s; }
+        .habit-actions .del-habit:hover svg { stroke: #f87171; }
+        .habit-actions .del-habit:hover { background: rgba(248,113,113,0.08); }
+
+        .empty-state {
+            padding: 3rem 1rem; text-align: center;
+        }
+        .empty-state p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
+
+        .msg { padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+        .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
+        .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 300; display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 2rem;
+            width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .modal h3 { font-size: 1rem; margin-bottom: 1.2rem; }
+        .modal .field { margin-bottom: 1rem; }
+        .modal .field label { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
+        .modal input, .modal select {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border); color: var(--text-primary);
+            padding: 0.6rem 0.7rem; border-radius: 8px; font-size: 0.85rem;
+            outline: none; transition: border-color 0.2s;
+            font-family: 'Inter', sans-serif; box-sizing: border-box;
+        }
+        .modal input:focus, .modal select:focus { border-color: var(--accent); }
+        .modal .btn-row { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .modal .btn-row button {
+            flex: 1; padding: 0.55rem; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: all 0.2s; border: none;
+            font-family: 'Inter', sans-serif;
+        }
+        .modal .btn-row .btn-primary { background: var(--accent); color: var(--bg-color); }
+        .modal .btn-row .btn-primary:hover { opacity: 0.85; }
+        .modal .btn-row .btn-cancel { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+        .modal .btn-row .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
+        .mobile-menu-btn {
+            display: none; align-items: center; justify-content: center;
+            width: 40px; height: 40px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 10px;
+            cursor: pointer; color: var(--text-primary); font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: flex; }
+            .h-sidebar {
+                position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+                transform: translateX(-100%); transition: transform 0.3s ease;
+                width: 260px;
+            }
+            .h-sidebar.open { transform: translateX(0); }
+            .h-wrapper::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+            .h-wrapper.overlay::before { display: block; }
+            .h-main { padding: 1.5rem; max-height: none; }
+            .habit-row { flex-direction: column; align-items: stretch; gap: 0.6rem; }
+            .habit-left { text-align: center; }
+            .habit-tracker { justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .h-header h1 { font-size: 1.4rem; }
+            .day-cell { width: 28px; height: 28px; }
+        }
+    </style>
+</head>
+<body>
+<div class="h-wrapper">
+    <aside class="h-sidebar">
+        <div class="logo">Mali<span>.</span></div>
+        <nav>
+            <div class="nav-label">General</div>
+            <a href="dashboard.html">📊 Panel principal</a>
+            <div class="nav-label">Finanzas</div>
+            <div class="nav-group">
+                <a href="finanzas-personales.html">💰 Finanzas personales</a>
+                <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            </div>
+            <a href="deudas.html">💳 Deudas</a>
+            <a href="inversiones.html">📈 Inversiones</a>
+            <div class="nav-label">Organización</div>
+            <div class="nav-group">
+                <a href="tareas.html">✅ Tareas</a>
+                <a href="calendario.html" class="sub">📅 Calendario</a>
+                <a href="habitos.html" class="sub active">🔥 Hábitos</a>
+                <a href="#" class="sub" style="opacity:0.4;pointer-events:none;">👥 Grupal</a>
+            </div>
+            <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
+            <div class="nav-group" id="adminGroup" style="display:none;">
+                <a href="admin.html" class="sub">⚙️ Panel admin</a>
+            </div>
+            <div class="nav-label">Próximamente</div>
+            <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
+        </nav>
+    </aside>
+
+    <main class="h-main">
+        <div class="h-header">
+            <div>
+                <div class="breadcrumb">📁 Organización / <span>Tracker de Hábitos</span></div>
+                <button class="mobile-menu-btn" id="menuBtn">☰</button>
+                <h1>Tracker de Hábitos</h1>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <button class="btn-cta" id="newHabitBtn">+ Nuevo Hábito</button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="avatar" id="userAvatar">M</div>
+                    <span class="name" id="userName">Cargando...</span>
+                    <span class="arrow">▼</span>
+                    <div class="user-dropdown-menu">
+                        <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                        <a href="preferencias.html">🎨 Preferencias</a>
+                        <div class="divider"></div>
+                        <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="hMsg" class="msg"></div>
+
+        <div class="board-card" id="boardCard">
+            <div class="empty-state" id="emptyState">
+                <p>Todavía no tenés hábitos registrados.</p>
+                <button class="btn-cta" id="emptyCta">+ Crear mi primer hábito</button>
+            </div>
+            <div id="habitsList"></div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3 id="modalTitle">Nuevo hábito</h3>
+        <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="mName" placeholder="Ej: Tomar agua, Leer 30 min...">
+        </div>
+        <div class="field">
+            <label>Ícono</label>
+            <select id="mIcon">
+                <option value="💧">💧 Agua</option>
+                <option value="📖">📖 Lectura</option>
+                <option value="🏃">🏃 Ejercicio</option>
+                <option value="🧘">🧘 Meditación</option>
+                <option value="✍️">✍️ Journaling</option>
+                <option value="💪">💪 Gimnasio</option>
+                <option value="🥦">🥦 Comida sana</option>
+                <option value="😴">😴 Dormir bien</option>
+                <option value="🎯">🎯 Meta diaria</option>
+                <option value="✅">✅ Otro</option>
+            </select>
+        </div>
+        <div class="btn-row">
+            <button class="btn-primary" id="mSaveBtn">Guardar</button>
+            <button class="btn-cancel" id="mCancelBtn">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
+    import { getHabits, addHabit, toggleHabitDay, deleteHabit } from '../script/habitos.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    document.getElementById('userName').textContent = profile?.name || 'Usuario'
+    document.getElementById('userAvatar').textContent = (profile?.name || 'U').charAt(0).toUpperCase()
+    if (profile?.role === 'admin') {
+        document.getElementById('adminLabel').style.display = 'block'
+        document.getElementById('adminGroup').style.display = 'block'
+    }
+
+    const dd = document.getElementById('userDropdown')
+    dd.addEventListener('click', (e) => { if (!e.target.closest('.user-dropdown-menu')) dd.classList.toggle('open') })
+    document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
+
+    document.getElementById('menuBtn')?.addEventListener('click', () => {
+        document.querySelector('.h-sidebar')?.classList.toggle('open')
+        document.querySelector('.h-wrapper')?.classList.toggle('overlay')
+    })
+
+    const msg = document.getElementById('hMsg')
+    function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 3000) }
+
+    const dayLabels = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+
+    async function cargarHabitos() {
+        try {
+            const habits = await getHabits()
+            renderHabitos(habits)
+        } catch (e) { showMsg('Error al cargar hábitos.', 'error') }
+    }
+
+    function renderHabitos(habits) {
+        const list = document.getElementById('habitsList')
+        const empty = document.getElementById('emptyState')
+        if (!habits.length) {
+            list.innerHTML = ''
+            empty.style.display = 'block'
+            return
+        }
+        empty.style.display = 'none'
+        list.innerHTML = habits.map(h => `
+            <div class="habit-row" data-id="${h.id}">
+                <div class="habit-left">
+                    <div class="habit-name">
+                        <span class="habit-icon">${h.icon}</span>
+                        ${h.name}
+                    </div>
+                    <div class="habit-streak">
+                        <span class="fire">🔥</span>
+                        Racha: ${h.racha} días
+                    </div>
+                </div>
+                <div class="habit-tracker">
+                    ${dayLabels.map((label, i) => {
+                        const day = h.days[i]
+                        const cls = day.isFuture ? 'day-future' : (day.done ? 'day-done' : 'day-empty')
+                        return `<div class="day-cell ${cls}" data-habit-id="${h.id}" data-date="${day.date}" data-done="${day.done}" title="${day.date}">${cls === 'day-done' ? '' : ''}</div>`
+                    }).join('')}
+                </div>
+                <div class="habit-actions">
+                    <button class="del-habit" onclick="eliminarHabit(${h.id})" title="Eliminar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `).join('')
+
+        document.querySelectorAll('.day-cell.day-empty, .day-cell.day-done').forEach(cell => {
+            if (cell.classList.contains('day-future')) return
+            cell.addEventListener('click', async () => {
+                const habitId = parseInt(cell.dataset.habitId)
+                const date = cell.dataset.date
+                const wasDone = cell.dataset.done === 'true'
+                try {
+                    await toggleHabitDay(habitId, date, !wasDone)
+                    await cargarHabitos()
+                } catch (e) { showMsg('Error al actualizar.', 'error') }
+            })
+        })
+    }
+
+    window.eliminarHabit = async function(id) {
+        if (!confirm('¿Eliminar este hábito?')) return
+        try {
+            await deleteHabit(id)
+            showMsg('Hábito eliminado.', 'success')
+            await cargarHabitos()
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    }
+
+    function openModal() {
+        document.getElementById('modalTitle').textContent = 'Nuevo hábito'
+        document.getElementById('mName').value = ''
+        document.getElementById('mIcon').value = '💧'
+        document.getElementById('modalOverlay').classList.add('open')
+        setTimeout(() => document.getElementById('mName').focus(), 100)
+    }
+
+    document.getElementById('newHabitBtn').addEventListener('click', openModal)
+    document.getElementById('emptyCta').addEventListener('click', openModal)
+
+    document.getElementById('mSaveBtn').addEventListener('click', async () => {
+        const name = document.getElementById('mName').value.trim()
+        const icon = document.getElementById('mIcon').value
+        if (!name) { showMsg('Ingresá un nombre para el hábito.', 'error'); return }
+        try {
+            await addHabit(name, icon)
+            showMsg('Hábito creado.', 'success')
+            document.getElementById('modalOverlay').classList.remove('open')
+            await cargarHabitos()
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    })
+
+    document.getElementById('mCancelBtn').addEventListener('click', () => document.getElementById('modalOverlay').classList.remove('open'))
+    document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) document.getElementById('modalOverlay').classList.remove('open') })
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open') })
+
+    await cargarHabitos()
+</script>
+</body>
+</html>
