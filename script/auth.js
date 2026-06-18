@@ -50,37 +50,13 @@ export async function register(name, email, password, activationCode) {
   const { data: claim, error: claimError } = await supabase
     .rpc('claim_activation_code', { code_to_claim: activationCode })
 
-  // Fallback: si la función RPC no existe, usar método directo con verificación de error
+  // Fallback: si la función RPC no existe, usar método directo
   if (claimError && claimError.message?.includes('function "claim_activation_code" does not exist')) {
-    const { data: codeData, error: codeError } = await supabase
-      .from('activation_codes')
-      .select('id, code')
-      .eq('code', activationCode)
-      .eq('used', false)
-      .maybeSingle()
-    if (codeError) throw new Error('Error al verificar código de activación.')
-    if (!codeData) throw new Error('Código de activación inválido o ya utilizado.')
-
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) throw new Error(traducirError(error))
-    if (!data || !data.user) throw new Error('Error al crear la cuenta.')
-
-    const { error: pe } = await supabase
-      .from('profiles')
-      .insert({ id: data.user.id, name, email, role: 'user' })
-    if (pe) throw new Error('Error al crear perfil de usuario.')
-
-    const { error: ue } = await supabase
-      .from('activation_codes')
-      .update({ used: true, used_by: data.user.id })
-      .eq('id', codeData.id)
-    if (ue) console.error('No se pudo marcar código como usado (RLS?). Ejecutá migrate-rpc-claim-code.sql')
-
-    return data
+    return await registerFallback(name, email, password, activationCode)
   }
 
   if (claimError) throw new Error('Error al verificar código de activación.')
-  if (!claim.success) throw new Error(claim.error)
+  if (!claim || !claim.success) throw new Error(claim?.error || 'Código inválido o ya utilizado.')
 
   // Paso 2: Crear usuario en auth
   const { data, error } = await supabase.auth.signUp({ email, password })
@@ -93,11 +69,47 @@ export async function register(name, email, password, activationCode) {
     .insert({ id: data.user.id, name, email, role: 'user' })
   if (pe) throw new Error('Error al crear perfil de usuario.')
 
-  // Paso 4: Asociar used_by (no crítico, el código ya está marcado como usado por el RPC)
-  await supabase
+  // Paso 4: Asociar used_by via RPC (SECURITY DEFINER, bypasses RLS)
+  const { error: ubError } = await supabase
+    .rpc('set_code_used_by', { code_id: claim.code_id, user_id: data.user.id })
+  if (ubError) {
+    console.error('No se pudo asociar used_by. Ejecutá migrate-activation-codes-fix.sql')
+  }
+
+  return data
+}
+
+async function registerFallback(name, email, password, activationCode) {
+  const { data: codeData, error: codeError } = await supabase
     .from('activation_codes')
-    .update({ used_by: data.user.id })
-    .eq('id', claim.code_id)
+    .select('id, code')
+    .eq('code', activationCode)
+    .eq('used', false)
+    .maybeSingle()
+  if (codeError) throw new Error('Error al verificar código de activación.')
+  if (!codeData) throw new Error('Código de activación inválido o ya utilizado.')
+
+  const { data, error } = await supabase.auth.signUp({ email, password })
+  if (error) throw new Error(traducirError(error))
+  if (!data || !data.user) throw new Error('Error al crear la cuenta.')
+
+  const { error: pe } = await supabase
+    .from('profiles')
+    .insert({ id: data.user.id, name, email, role: 'user' })
+  if (pe) throw new Error('Error al crear perfil de usuario.')
+
+  // Intentar RPC de used_by, si no existe usar directo
+  const { error: rpcErr } = await supabase
+    .rpc('set_code_used_by', { code_id: codeData.id, user_id: data.user.id })
+  if (rpcErr) {
+    const { error: ue } = await supabase
+      .from('activation_codes')
+      .update({ used: true, used_by: data.user.id })
+      .eq('id', codeData.id)
+    if (ue) {
+      console.error('No se pudo marcar código como usado. Ejecutá migrate-activation-codes-fix.sql')
+    }
+  }
 
   return data
 }

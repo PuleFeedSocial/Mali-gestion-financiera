@@ -319,10 +319,11 @@
                             <th>Estado</th>
                             <th>Usado por</th>
                             <th>Creado</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="codesBody">
-                        <tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:2rem;">Cargando códigos...</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:2rem;">Cargando códigos...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -424,13 +425,30 @@
         tbody.innerHTML = data.map(c => {
             const fecha = new Date(c.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
             const usado = c.used
+            const usadoPor = usado && c.profiles ? c.profiles.name : (usado ? '(desconocido)' : '-')
             return `<tr>
                 <td><span class="badge-code">${c.code}</span></td>
                 <td>${usado ? '<span class="badge-used">● Usado</span>' : '<span class="badge-available">● Disponible</span>'}</td>
-                <td style="color:var(--text-secondary);font-size:0.8rem;">${usado && c.profiles ? c.profiles.name : '-'}</td>
+                <td style="color:var(--text-secondary);font-size:0.8rem;">${usadoPor}</td>
                 <td style="color:var(--text-secondary);font-size:0.8rem;">${fecha}</td>
+                <td><button class="small-btn danger" onclick="eliminarCodigo('${c.id}')">Eliminar</button></td>
             </tr>`
         }).join('')
+    }
+
+    window.eliminarCodigo = async function(codeId) {
+        if (!confirm('¿Eliminar este código de activación?')) return
+        try {
+            const { error } = await supabase
+                .from('activation_codes')
+                .delete()
+                .eq('id', codeId)
+            if (error) throw error
+            showMsg('Código eliminado.', 'success')
+            await cargarCodigos()
+        } catch (e) {
+            showMsg('Error al eliminar: ' + e.message, 'error')
+        }
     }
 
     document.getElementById('genBtn').addEventListener('click', async () => {

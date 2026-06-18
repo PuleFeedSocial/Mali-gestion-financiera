@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   type TEXT NOT NULL CHECK (type IN ('tarea', 'evento')),
   description TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'por_hacer' CHECK (status IN ('por_hacer', 'en_progreso', 'en_pausa', 'realizado')),
+  tag TEXT DEFAULT 'personal' CHECK (tag IN ('academic', 'freelance', 'personal')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

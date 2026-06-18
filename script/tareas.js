@@ -19,7 +19,7 @@ export async function getTasks({ status, type } = {}) {
   return data || []
 }
 
-export async function addTask({ date, type, description }) {
+export async function addTask({ date, type, description, tag }) {
   const session = await getSession()
   if (!session) throw new Error('No hay sesión.')
 
@@ -28,6 +28,7 @@ export async function addTask({ date, type, description }) {
     date,
     type,
     description,
+    tag: tag || 'personal',
     status: 'por_hacer'
   })
   if (error) throw error
@@ -45,13 +46,13 @@ export async function updateTaskStatus(id, newStatus) {
   if (error) throw error
 }
 
-export async function updateTask(id, { date, type, description }) {
+export async function updateTask(id, { date, type, description, tag }) {
   const session = await getSession()
   if (!session) throw new Error('No hay sesión.')
 
   const { error } = await supabase
     .from('tasks')
-    .update({ date, type, description })
+    .update({ date, type, description, tag })
     .eq('id', id)
     .eq('user_id', session.user.id)
   if (error) throw error
