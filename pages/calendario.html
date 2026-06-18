@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mali | Calendario</title>
+    <link rel="stylesheet" href="../style/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: #1f1f1d;
+            --border: rgba(255,255,255,0.08);
+            --radius: 16px;
+        }
+        body { margin:0; font-family:'Inter',sans-serif; background:var(--bg-color); color:var(--text-primary); }
+        .c-wrapper { display:flex; min-height:100vh; }
+        .c-sidebar {
+            width:240px; background:var(--bg-color);
+            border-right:1px solid var(--border);
+            padding:2rem 0; flex-shrink:0;
+        }
+        .c-sidebar .logo { padding:0 1.5rem; margin-bottom:2rem; font-size:1.4rem; font-weight:800; letter-spacing:-1.5px; }
+        .c-sidebar .logo span { color:var(--accent); }
+        .c-sidebar nav a { display:flex; align-items:center; gap:12px; padding:0.65rem 1.5rem; color:var(--text-secondary); text-decoration:none; font-size:0.9rem; transition:all 0.2s; border-radius:8px; margin:0 0.5rem; }
+        .c-sidebar nav a:hover { color:var(--accent); background:rgba(199,239,0,0.08); }
+        .c-sidebar nav a.active { color:var(--accent); background:rgba(199,239,0,0.1); font-weight:500; }
+        .c-sidebar .nav-label { padding:1.2rem 1.5rem 0.4rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.5); font-weight:600; }
+        .c-sidebar .nav-group { position:relative; }
+        .c-sidebar .nav-group::before { content:''; position:absolute; left:2.3rem; top:2.2rem; bottom:0.8rem; width:1px; background:var(--border); }
+        .c-sidebar .nav-group:last-of-type::before { bottom:50%; }
+        .c-sidebar nav a.sub { padding-left:3.2rem; font-size:0.85rem; position:relative; }
+        .c-sidebar nav a.sub::before { content:''; position:absolute; left:-0.9rem; top:50%; width:0.7rem; height:1px; background:var(--border); }
+        .c-main { flex:1; padding:2.5rem 3rem; overflow-y:auto; max-height:100vh; }
+        .c-header {
+            display:flex; justify-content:space-between; align-items:flex-start;
+            margin-bottom:2rem; flex-wrap:wrap; gap:1rem;
+        }
+        .c-header .breadcrumb { font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.3rem; letter-spacing:0.3px; }
+        .c-header .breadcrumb span { color:var(--accent); }
+        .c-header h1 { font-size:2rem; font-weight:700; letter-spacing:-1px; margin:0; }
+
+        .user-dropdown { position:relative; display:flex; align-items:center; gap:0.5rem; cursor:pointer; }
+        .user-dropdown .avatar { width:38px; height:38px; border-radius:50%; background:var(--accent); color:var(--bg-color); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.95rem; }
+        .user-dropdown .name { font-size:0.9rem; font-weight:600; }
+        .user-dropdown .arrow { font-size:0.6rem; color:var(--text-secondary); transition:transform 0.2s; margin-left:0.3rem; }
+        .user-dropdown.open .arrow { transform:rotate(180deg); }
+        .user-dropdown-menu { position:absolute; top:calc(100% + 8px); right:0; background:var(--surface); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.5rem; min-width:200px; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:200; }
+        .user-dropdown.open .user-dropdown-menu { display:block; }
+        .user-dropdown-menu a { display:flex; align-items:center; gap:0.7rem; padding:0.6rem 0.8rem; color:var(--text-secondary); text-decoration:none; font-size:0.85rem; border-radius:8px; transition:all 0.15s; }
+        .user-dropdown-menu a:hover { background:rgba(255,255,255,0.05); color:var(--text-primary); }
+        .user-dropdown-menu .divider { height:1px; background:var(--border); margin:0.3rem 0.5rem; }
+        .user-dropdown-menu .logout-btn { color:#ff6b6b; }
+        .user-dropdown-menu .logout-btn:hover { background:rgba(255,107,107,0.1); color:#ff6b6b; }
+
+        .cal-nav {
+            display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+            margin-bottom:1.5rem;
+        }
+        .cal-nav button {
+            background:var(--surface); border:1px solid var(--border);
+            color:var(--text-primary); padding:0.5rem 1rem;
+            border-radius:8px; cursor:pointer; font-size:0.85rem;
+            transition:all 0.2s; font-family:'Inter',sans-serif;
+        }
+        .cal-nav button:hover { border-color:var(--accent); color:var(--accent); }
+        .cal-nav .month-year {
+            font-size:1.3rem; font-weight:600; min-width:200px; text-align:center;
+        }
+        .cal-nav select {
+            background:var(--surface); border:1px solid var(--border);
+            color:var(--text-primary); padding:0.5rem 0.7rem;
+            border-radius:8px; font-size:0.85rem; outline:none;
+            font-family:'Inter',sans-serif;
+        }
+        .cal-nav select option { background:var(--surface); }
+
+        .cal-grid {
+            display:grid;
+            grid-template-columns:repeat(7, 1fr);
+            gap:1px;
+            background:var(--border);
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            overflow:hidden;
+        }
+        .cal-header {
+            background:var(--surface);
+            padding:0.8rem 0.5rem;
+            text-align:center;
+            font-size:0.7rem;
+            font-weight:600;
+            letter-spacing:0.5px;
+            color:var(--text-secondary);
+            text-transform:uppercase;
+        }
+        .cal-day {
+            background:var(--surface);
+            min-height:110px;
+            padding:0.5rem;
+            cursor:pointer;
+            transition:background 0.15s;
+            position:relative;
+        }
+        .cal-day:hover { background:rgba(255,255,255,0.03); }
+        .cal-day.other-month { opacity:0.25; }
+        .cal-day.today { border:1px solid var(--accent); }
+        .cal-day .day-num {
+            font-size:0.8rem; font-weight:600; margin-bottom:0.3rem;
+            color:var(--text-secondary);
+        }
+        .cal-day.today .day-num { color:var(--accent); }
+        .cal-day .cal-task {
+            font-size:0.65rem; padding:0.15rem 0.35rem;
+            border-radius:3px; margin-bottom:0.2rem;
+            cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+            transition:opacity 0.15s;
+        }
+        .cal-day .cal-task:hover { opacity:0.8; }
+        .cal-day .cal-task.tarea { background:rgba(199,239,0,0.12); color:var(--accent); }
+        .cal-day .cal-task.evento { background:rgba(100,200,255,0.12); color:#64c8ff; }
+        .cal-day .cal-task.done { opacity:0.35; text-decoration:line-through; }
+        .cal-day .more-link {
+            font-size:0.6rem; color:var(--accent); cursor:pointer;
+            padding:0.1rem 0; display:inline-block;
+        }
+
+        .msg { padding:0.6rem 1rem; border-radius:8px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+        .msg.error { display:block; background:rgba(255,70,70,0.12); border:1px solid rgba(255,70,70,0.2); color:#ff6b6b; }
+        .msg.success { display:block; background:rgba(199,239,0,0.1); border:1px solid rgba(199,239,0,0.15); color:var(--accent); }
+
+        .modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.6);
+            z-index:300; display:none; align-items:center; justify-content:center;
+        }
+        .modal-overlay.open { display:flex; }
+        .modal {
+            background:var(--surface); border:1px solid var(--border);
+            border-radius:var(--radius); padding:2rem;
+            width:90%; max-width:400px; box-shadow:0 20px 40px rgba(0,0,0,0.5);
+        }
+        .modal h3 { font-size:1rem; margin-bottom:1.2rem; }
+        .modal .field { margin-bottom:1rem; }
+        .modal .field label { display:block; font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.3rem; }
+        .modal select, .modal input {
+            width:100%; background:rgba(255,255,255,0.05);
+            border:1px solid var(--border); color:var(--text-primary);
+            padding:0.6rem 0.7rem; border-radius:6px; font-size:0.85rem;
+            outline:none; transition:border-color 0.2s;
+            font-family:'Inter',sans-serif; box-sizing:border-box;
+        }
+        .modal select:focus, .modal input:focus { border-color:var(--accent); }
+        .modal select option { background:var(--surface); }
+        .modal .btn-row { display:flex; gap:0.5rem; margin-top:1rem; }
+        .modal .btn-row button {
+            flex:1; padding:0.55rem; border-radius:8px; font-weight:600;
+            font-size:0.85rem; cursor:pointer; transition:all 0.2s; border:none;
+            font-family:'Inter',sans-serif;
+        }
+        .modal .btn-row .btn-primary { background:var(--accent); color:var(--bg-color); }
+        .modal .btn-row .btn-primary:hover { opacity:0.85; }
+        .modal .btn-row .btn-cancel { background:rgba(255,255,255,0.05); color:var(--text-secondary); }
+        .modal .btn-row .btn-cancel:hover { background:rgba(255,255,255,0.1); }
+        .modal .btn-row .btn-danger { background:rgba(255,70,70,0.15); color:#ff6b6b; }
+        .modal .btn-row .btn-danger:hover { background:rgba(255,70,70,0.25); }
+
+        .mobile-menu-btn { display:none; align-items:center; justify-content:center; width:40px; height:40px; background:var(--surface); border:1px solid var(--border); border-radius:10px; cursor:pointer; color:var(--text-primary); font-size:1.2rem; flex-shrink:0; }
+        @media (max-width:768px) {
+            .mobile-menu-btn { display:flex; }
+            .c-sidebar { position:fixed; left:0; top:0; bottom:0; z-index:100; transform:translateX(-100%); transition:transform 0.3s ease; width:260px; }
+            .c-sidebar.open { transform:translateX(0); }
+            .c-wrapper::before { content:''; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:99; display:none; }
+            .c-wrapper.overlay::before { display:block; }
+            .c-main { padding:1.5rem; max-height:none; }
+            .cal-grid { grid-template-columns:repeat(7, 1fr); font-size:0.75rem; }
+            .cal-day { min-height:80px; padding:0.3rem; }
+        }
+        @media (max-width:480px) {
+            .c-header h1 { font-size:1.4rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="c-wrapper">
+    <aside class="c-sidebar">
+        <div class="logo">Mali<span>.</span></div>
+        <nav>
+            <div class="nav-label">General</div>
+            <a href="dashboard.html">📊 Panel principal</a>
+            <div class="nav-label">Finanzas</div>
+            <div class="nav-group">
+                <a href="finanzas-personales.html">💰 Finanzas personales</a>
+                <a href="finanzas-personales.html#movimientos" class="sub">📋 Movimientos</a>
+            </div>
+            <a href="deudas.html">💳 Deudas</a>
+            <a href="#" style="opacity:0.4;pointer-events:none;">📈 Inversiones</a>
+            <div class="nav-label">Organización</div>
+            <div class="nav-group">
+                <a href="tareas.html">✅ Tareas</a>
+                <a href="calendario.html" class="active">📅 Calendario</a>
+                <a href="#" class="sub" style="opacity:0.4;pointer-events:none;">🔥 Hábitos</a>
+                <a href="#" class="sub" style="opacity:0.4;pointer-events:none;">👥 Grupal</a>
+            </div>
+            <div class="nav-label" id="adminLabel" style="display:none;">Administración</div>
+            <div class="nav-group" id="adminGroup" style="display:none;">
+                <a href="admin.html" class="sub">⚙️ Panel admin</a>
+            </div>
+            <div class="nav-label">Próximamente</div>
+            <a href="#" style="opacity:0.4;pointer-events:none;">⏱️ Gestión de Tiempo</a>
+        </nav>
+    </aside>
+
+    <main class="c-main">
+        <div class="c-header">
+            <div>
+                <div class="breadcrumb">📁 Organización / <span>Calendario</span></div>
+                <button class="mobile-menu-btn" id="menuBtn">☰</button>
+                <h1>Calendario</h1>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="avatar" id="userAvatar">M</div>
+                <span class="name" id="userName">Cargando...</span>
+                <span class="arrow">▼</span>
+                <div class="user-dropdown-menu">
+                    <a href="ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                    <a href="preferencias.html">🎨 Preferencias</a>
+                    <div class="divider"></div>
+                    <a href="#" class="logout-btn" id="logoutBtn">🚪 Cerrar sesión</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="cMsg" class="msg"></div>
+
+        <div class="cal-nav">
+            <button id="prevMonth">‹</button>
+            <div class="month-year" id="monthYearLabel">Enero 2026</div>
+            <button id="nextMonth">›</button>
+            <select id="monthSelect"></select>
+            <select id="yearSelect"></select>
+            <button id="todayBtn">Hoy</button>
+        </div>
+
+        <div class="cal-grid" id="calGrid">
+            <div class="cal-header">Lun</div>
+            <div class="cal-header">Mar</div>
+            <div class="cal-header">Mié</div>
+            <div class="cal-header">Jue</div>
+            <div class="cal-header">Vie</div>
+            <div class="cal-header">Sáb</div>
+            <div class="cal-header">Dom</div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3 id="modalTitle">Nueva tarea</h3>
+        <div class="field">
+            <label>Fecha</label>
+            <input type="date" id="mFecha" readonly>
+        </div>
+        <div class="field">
+            <label>Tipo</label>
+            <select id="mTipo">
+                <option value="tarea">Tarea</option>
+                <option value="evento">Evento</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Descripción</label>
+            <input type="text" id="mDesc" placeholder="Ej: Estudiar JavaScript, Reunión equipo...">
+        </div>
+        <div class="btn-row" id="modalActions">
+            <button class="btn-primary" id="mSaveBtn">Guardar</button>
+            <button class="btn-cancel" id="mCancelBtn">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
+    import { getTasks, addTask, updateTaskStatus, updateTask, deleteTask } from '../script/tareas.js'
+
+    const session = await requireAuth()
+    if (!session) throw new Error()
+
+    const profile = await getUserProfile()
+    if (profile) {
+        if (!profile.setup_complete) { window.location.href = 'setup.html'; throw new Error() }
+        document.getElementById('userName').textContent = profile.name
+        document.getElementById('userAvatar').textContent = profile.name.charAt(0).toUpperCase()
+        if (profile.role === 'admin') {
+            document.getElementById('adminLabel').style.display = 'block'
+            document.getElementById('adminGroup').style.display = 'block'
+        }
+    }
+
+    let currentDate = new Date()
+    let currentMonth = currentDate.getMonth()
+    let currentYear = currentDate.getFullYear()
+    let allTasks = []
+    let editingTaskId = null
+
+    const msg = document.getElementById('cMsg')
+    function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 3500) }
+
+    const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+    const dayHeaders = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+
+    function populateSelects() {
+        const ms = document.getElementById('monthSelect')
+        ms.innerHTML = monthNames.map((m, i) => `<option value="${i}">${m}</option>`).join('')
+        ms.value = currentMonth
+
+        const ys = document.getElementById('yearSelect')
+        const y = currentDate.getFullYear()
+        ys.innerHTML = ''
+        for (let i = y - 10; i <= y + 10; i++) {
+            const opt = document.createElement('option')
+            opt.value = i; opt.textContent = i
+            if (i === currentYear) opt.selected = true
+            ys.appendChild(opt)
+        }
+    }
+
+    async function cargarTareas() {
+        try {
+            allTasks = await getTasks()
+            renderCalendario()
+        } catch (e) { showMsg('Error al cargar tareas.', 'error') }
+    }
+
+    function renderCalendario() {
+        const firstDay = new Date(currentYear, currentMonth, 1)
+        const lastDay = new Date(currentYear, currentMonth + 1, 0)
+        const daysInMonth = lastDay.getDate()
+        // Monday = 0, Sunday = 6
+        let startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1
+        const todayStr = currentDate.toISOString().split('T')[0]
+
+        document.getElementById('monthYearLabel').textContent = `${monthNames[currentMonth]} ${currentYear}`
+        document.getElementById('monthSelect').value = currentMonth
+        document.getElementById('yearSelect').value = currentYear
+
+        const grid = document.getElementById('calGrid')
+        // Keep header rows
+        grid.innerHTML = dayHeaders.map(d => `<div class="cal-header">${d}</div>`).join('')
+
+        // Previous month days
+        const prevMonth = new Date(currentYear, currentMonth, 0)
+        const prevDays = prevMonth.getDate()
+
+        for (let i = startDay - 1; i >= 0; i--) {
+            const d = prevDays - i
+            const dateStr = `${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+            grid.appendChild(createDayCell(d, dateStr, true, todayStr))
+        }
+
+        // Current month days
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+            grid.appendChild(createDayCell(d, dateStr, false, todayStr))
+        }
+
+        // Remaining cells to fill the grid
+        const totalCells = startDay + daysInMonth
+        const remaining = (7 - (totalCells % 7)) % 7
+        for (let d = 1; d <= remaining; d++) {
+            const dateStr = `${currentYear}-${String(currentMonth + 2).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+            grid.appendChild(createDayCell(d, dateStr, true, todayStr))
+        }
+    }
+
+    function createDayCell(dayNum, dateStr, other, todayStr) {
+        const div = document.createElement('div')
+        div.className = 'cal-day' + (other ? ' other-month' : '') + (dateStr === todayStr ? ' today' : '')
+        div.innerHTML = `<div class="day-num">${dayNum}</div>`
+        div.dataset.date = dateStr
+
+        const tasks = allTasks.filter(t => t.date === dateStr)
+        const visible = tasks.slice(0, 3)
+        const extra = tasks.length - 3
+
+        visible.forEach(t => {
+            const span = document.createElement('div')
+            span.className = `cal-task ${t.type}${t.status === 'realizado' ? ' done' : ''}`
+            span.textContent = t.description
+            span.addEventListener('click', (e) => {
+                e.stopPropagation()
+                openEditModal(t.id, t.date, t.type, t.description)
+            })
+            div.appendChild(span)
+        })
+
+        if (extra > 0) {
+            const more = document.createElement('span')
+            more.className = 'more-link'
+            more.textContent = `+${extra} más`
+            more.addEventListener('click', (e) => {
+                e.stopPropagation()
+                openDayDetail(dateStr, tasks)
+            })
+            div.appendChild(more)
+        }
+
+        div.addEventListener('click', () => openAddModal(dateStr))
+        return div
+    }
+
+    function openAddModal(dateStr) {
+        editingTaskId = null
+        document.getElementById('modalTitle').textContent = 'Nueva tarea'
+        document.getElementById('mFecha').value = dateStr
+        document.getElementById('mTipo').value = 'tarea'
+        document.getElementById('mDesc').value = ''
+        document.getElementById('mSaveBtn').textContent = 'Guardar'
+        document.getElementById('modalOverlay').classList.add('open')
+        document.getElementById('mDesc').focus()
+    }
+
+    function openEditModal(id, dateStr, type, desc) {
+        editingTaskId = id
+        document.getElementById('modalTitle').textContent = 'Editar tarea'
+        document.getElementById('mFecha').value = dateStr
+        document.getElementById('mTipo').value = type
+        document.getElementById('mDesc').value = desc
+        document.getElementById('mSaveBtn').textContent = 'Actualizar'
+        document.getElementById('modalOverlay').classList.add('open')
+        document.getElementById('mDesc').focus()
+    }
+
+    function openDayDetail(dateStr, tasks) {
+        const list = tasks.map(t => `• ${t.type === 'tarea' ? '📋' : '📅'} ${t.description} (${t.status === 'realizado' ? '✅ Hecho' : t.status === 'en_progreso' ? '🔄 En progreso' : t.status === 'en_pausa' ? '⏸ Pausa' : '📌 Pendiente'})`).join('\n')
+        if (confirm(`Tareas del ${dateStr}:\n\n${list}\n\n¿Agregar otra?`)) {
+            openAddModal(dateStr)
+        }
+    }
+
+    document.getElementById('mSaveBtn').addEventListener('click', async () => {
+        const date = document.getElementById('mFecha').value
+        const type = document.getElementById('mTipo').value
+        const desc = document.getElementById('mDesc').value.trim()
+
+        if (!desc) { showMsg('Ingresá una descripción.', 'error'); return }
+
+        try {
+            if (editingTaskId) {
+                await updateTask(editingTaskId, { date, type, description: desc })
+                showMsg('Tarea actualizada.', 'success')
+            } else {
+                await addTask({ date, type, description: desc })
+                showMsg('Tarea agregada.', 'success')
+            }
+            document.getElementById('modalOverlay').classList.remove('open')
+            await cargarTareas()
+        } catch (e) { showMsg('Error: ' + e.message, 'error') }
+    })
+
+    document.getElementById('mCancelBtn').addEventListener('click', () => {
+        document.getElementById('modalOverlay').classList.remove('open')
+    })
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) document.getElementById('modalOverlay').classList.remove('open')
+    })
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open')
+    })
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+        currentMonth--
+        if (currentMonth < 0) { currentMonth = 11; currentYear-- }
+        renderCalendario()
+    })
+    document.getElementById('nextMonth').addEventListener('click', () => {
+        currentMonth++
+        if (currentMonth > 11) { currentMonth = 0; currentYear++ }
+        renderCalendario()
+    })
+    document.getElementById('monthSelect').addEventListener('change', (e) => {
+        currentMonth = parseInt(e.target.value)
+        renderCalendario()
+    })
+    document.getElementById('yearSelect').addEventListener('change', (e) => {
+        currentYear = parseInt(e.target.value)
+        renderCalendario()
+    })
+    document.getElementById('todayBtn').addEventListener('click', () => {
+        const now = new Date()
+        currentMonth = now.getMonth()
+        currentYear = now.getFullYear()
+        renderCalendario()
+    })
+
+    const dd = document.getElementById('userDropdown')
+    dd.addEventListener('click', (e) => { if (e.target.closest('.user-dropdown-menu')) return; dd.classList.toggle('open') })
+    document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
+    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
+    document.getElementById('menuBtn')?.addEventListener('click', () => {
+        document.querySelector('.c-sidebar')?.classList.toggle('open')
+        document.querySelector('.c-wrapper')?.classList.toggle('overlay')
+    })
+
+    populateSelects()
+    await cargarTareas()
+</script>
+</body>
+</html>
