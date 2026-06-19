@@ -789,3 +789,52 @@ body {
     color: var(--text-secondary);
     opacity: 0.5;
 }
+
+/* =========================================
+   8. PWA / Mobile App Enhancements
+   ========================================= */
+.pwa-install-btn {
+    display: none; align-items: center; gap: 0.5rem;
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    background: var(--accent); color: var(--bg-color);
+    border: none; padding: 0.7rem 1.2rem; border-radius: 12px;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    z-index: 9998; box-shadow: 0 4px 20px rgba(199,239,0,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.pwa-install-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(199,239,0,0.4); }
+.pwa-install-btn:active { transform: scale(0.95); }
+
+@media (display-mode: standalone) {
+    .pwa-install-btn { display: none !important; }
+    .navbar { padding-top: env(safe-area-inset-top, 0); }
+    body { padding-bottom: env(safe-area-inset-bottom, 0); }
+    .dash-wrapper, .admin-wrapper, .fp-wrapper, .d-wrapper, .t-wrapper, .c-wrapper, .h-wrapper, .i-wrapper {
+        padding-top: env(safe-area-inset-top, 0);
+        min-height: 100dvh;
+    }
+}
+
+/* Sidebar overlay click-to-close */
+.dash-wrapper::before, .admin-wrapper::before, .fp-wrapper::before,
+.d-wrapper::before, .t-wrapper::before, .c-wrapper::before,
+.h-wrapper::before, .i-wrapper::before {
+    content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 99; display: none;
+}
+.dash-wrapper.overlay::before, .admin-wrapper.overlay::before,
+.fp-wrapper.overlay::before, .d-wrapper.overlay::before,
+.t-wrapper.overlay::before, .c-wrapper.overlay::before,
+.h-wrapper.overlay::before, .i-wrapper.overlay::before { display: block; }
+
+@media (max-width: 768px) {
+    .dash-main, .admin-main, .fp-main, .d-main, .t-main, .c-main, .h-main, .i-main { padding: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+    .dash-main, .admin-main, .fp-main, .d-main, .t-main, .c-main, .h-main, .i-main { padding: 1rem; }
+    .dash-sidebar, .admin-sidebar, .d-sidebar, .t-sidebar, .c-sidebar, .h-sidebar, .fp-sidebar, .i-sidebar { width: 260px; }
+    button, .btn, .btn-primary, .btn-outline { min-height: 44px; font-size: 0.9rem; }
+    input, select, textarea { font-size: 16px !important; }
+    .mobile-menu-btn { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; }
+}

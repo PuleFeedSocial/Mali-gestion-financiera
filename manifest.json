@@ -1,0 +1,24 @@
+{
+  "name": "Mali - Finanzas y Productividad",
+  "short_name": "Mali",
+  "description": "Workspace que integra finanzas, tareas, calendario, hábitos y colaboración en equipo.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#2d2d2a",
+  "theme_color": "#2d2d2a",
+  "categories": ["finance", "productivity", "business"],
+  "lang": "es-AR",
+  "icons": [
+    { "src": "/icons/icon-192.svg", "type": "image/svg+xml", "sizes": "192x192" },
+    { "src": "/icons/icon.svg", "type": "image/svg+xml", "sizes": "512x512" },
+    { "src": "/icons/icon.svg", "type": "image/svg+xml", "sizes": "512x512", "purpose": "maskable" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    { "name": "Dashboard", "url": "/pages/dashboard.html", "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }] },
+    { "name": "Tareas", "url": "/pages/tareas.html", "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }] },
+    { "name": "Finanzas", "url": "/pages/finanzas-personales.html", "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }] }
+  ]
+}

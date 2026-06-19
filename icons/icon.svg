@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#2d2d2a"/>
+  <text x="256" y="280" font-family="Inter, sans-serif" font-size="180" font-weight="800" fill="#c7ef00" text-anchor="middle" letter-spacing="-8">M</text>
+  <text x="256" y="400" font-family="Inter, sans-serif" font-size="72" font-weight="600" fill="rgba(255,255,255,0.6)" text-anchor="middle">Mali</text>
+</svg>

@@ -209,4 +209,90 @@ export function formatCurrency(amount, currency) {
   return `${symbols[c] || '$'}${n} ${c}`
 }
 
-export { supabase }
+// ---------- Push Notifications ----------
+
+export async function subscribeToPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null
+  const reg = await navigator.serviceWorker.ready
+  let sub = await reg.pushManager.getSubscription()
+  if (sub) return sub
+  const publicKey = await getVapidPublicKey()
+  if (!publicKey) return null
+  sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(publicKey)
+  })
+  await saveSubscription(sub)
+  return sub
+}
+
+export async function unsubscribeFromPush() {
+  if (!('serviceWorker' in navigator)) return
+  const reg = await navigator.serviceWorker.ready
+  const sub = await reg.pushManager.getSubscription()
+  if (sub) {
+    await sub.unsubscribe()
+    await removeSubscription(sub.endpoint)
+  }
+}
+
+async function saveSubscription(sub) {
+  const session = await getSession()
+  if (!session) return
+  await supabase.from('push_subscriptions').upsert({
+    user_id: session.user.id,
+    endpoint: sub.endpoint,
+    p256dh: btoa(String.fromCharCode(...new Uint8Array(sub.getKey('p256dh')))),
+    auth: btoa(String.fromCharCode(...new Uint8Array(sub.getKey('auth'))))
+  }, { onConflict: 'user_id,endpoint' })
+}
+
+async function removeSubscription(endpoint) {
+  await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint)
+}
+
+async function getVapidPublicKey() {
+  const session = await getSession()
+  if (!session) return null
+  const { data } = await supabase.from('app_settings').select('value').eq('key', 'vapid_public_key').maybeSingle()
+  return data?.value || null
+}
+
+function urlBase64ToUint8Array(base64) {
+  const padding = '='.repeat((4 - base64.length % 4) % 4)
+  const b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const raw = atob(b64)
+  return Uint8Array.from(raw, c => c.charCodeAt(0))
+}
+
+// ---------- Notification Preferences ----------
+
+const NOTIF_TYPES = ['task_reminder', 'debt_reminder', 'habit_reminder', 'calendar_event', 'group_invite']
+const NOTIF_LABELS = {
+  task_reminder: 'Recordatorio de tareas',
+  debt_reminder: 'Vencimiento de deudas',
+  habit_reminder: 'Hábitos pendientes',
+  calendar_event: 'Eventos del calendario',
+  group_invite: 'Invitaciones a grupos'
+}
+
+export async function getNotificationPreferences() {
+  const session = await getSession()
+  if (!session) return {}
+  const { data } = await supabase.from('notification_preferences').select('notification_type, enabled').eq('user_id', session.user.id)
+  const map = {}
+  if (data) for (const p of data) map[p.notification_type] = p.enabled
+  return map
+}
+
+export async function setNotificationPreference(type, enabled) {
+  const session = await getSession()
+  if (!session) throw new Error('No hay sesión.')
+  await supabase.from('notification_preferences').upsert({
+    user_id: session.user.id,
+    notification_type: type,
+    enabled
+  }, { onConflict: 'user_id,notification_type' })
+}
+
+export { NOTIF_TYPES, NOTIF_LABELS, supabase }
