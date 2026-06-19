@@ -1224,10 +1224,19 @@ img { max-width: 100%; display: block; }
   .app-sidebar.open { transform: translateX(0); }
   .mobile-menu-btn { display: flex; }
   .app-main { padding: 1.2rem; max-height: none; overflow-y: visible; }
+  .app-header { position: relative; }
   .app-header h1 { font-size: 1.3rem; }
-  .app-header .mobile-menu-btn { display: flex; margin-top: 0.2rem; }
-  .app-header { flex-direction: row; }
-  .app-header > div:first-child { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .app-header .mobile-menu-btn {
+    display: flex; position: absolute; left: 0; top: 0;
+    z-index: 2; margin-top: 0;
+  }
+  .app-header > div:first-child {
+    display: flex; flex-direction: column; align-items: flex-start;
+    padding-left: 2.8rem; min-width: 0;
+  }
+  .app-header > div:first-child .breadcrumb {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  }
 
   /* Landing page */
   .navbar { padding: 0.8rem 5%; }
@@ -1291,9 +1300,10 @@ img { max-width: 100%; display: block; }
   .cal-nav .nav-right { justify-content: flex-end; }
 
   /* Habits */
-  .habit-row { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+  .habit-row { flex-direction: column; align-items: stretch; gap: 0.5rem; padding: 0.7rem 0.8rem; }
   .habit-left { text-align: center; }
   .habit-tracker { justify-content: center; flex-wrap: wrap; }
+  .board-card { border-radius: var(--radius); }
 
   /* Summary cards */
   .resumen-grid { grid-template-columns: 1fr 1fr; }
@@ -1316,12 +1326,26 @@ img { max-width: 100%; display: block; }
 
   /* Shared components */
   .section-card { padding: 1.2rem; }
+  .section-title { font-size: 0.82rem; }
+  .msg { margin-bottom: 0.8rem; }
   .form-grid { grid-template-columns: 1fr !important; }
   .filter-tabs { justify-content: center; }
 
-  /* Hide user name on mobile to save space */
+  /* User area - compact */
   .user-dropdown .name { display: none; }
   .user-area { gap: 0.4rem; }
+  .user-dropdown-menu {
+    right: -8px; min-width: 180px;
+  }
+
+  /* Admin gen-row stack */
+  .gen-row { flex-direction: column; align-items: stretch; }
+  .gen-row .field { width: 100%; }
+  .gen-row input { width: 100%; }
+  .gen-row .btn-gen { width: 100%; text-align: center; }
+
+  /* Habit header button in user area */
+  .app-header .btn-cta { font-size: 0.78rem; padding: 0.4rem 0.8rem; white-space: nowrap; }
 }
 
 /* Small phones (< 480px) */
@@ -1344,13 +1368,19 @@ img { max-width: 100%; display: block; }
   .modal { padding: 1.2rem; }
   .hero h1 { font-size: 1.7rem; }
   .bento-card { padding: 1.2rem; }
+  .habit-row { padding: 0.6rem; }
+  .board-card { border-radius: calc(var(--radius) - 2px); }
   .section-card { padding: 1rem; }
   .settings-wrapper, .pref-wrapper { padding: 1.2rem 1rem; }
   .card-settings, .card-pref { padding: 1rem; }
   .footer-top { gap: 1.5rem; }
   .footer-links { gap: 1.5rem; }
   .user-dropdown .name { display: none; }
+  .user-dropdown-menu { right: -4px; min-width: 160px; }
+  .user-dropdown-menu a { font-size: 0.78rem; padding: 0.45rem 0.6rem; }
   .toolbar select { min-width: 80px; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar .search-wrap { min-width: 0; }
 
   /* Touch-friendly targets */
   button, .btn, .btn-primary, .btn-outline, .btn-cta, .btn-add, .btn-gen, .btn-submit,
