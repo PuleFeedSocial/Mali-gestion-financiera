@@ -11,229 +11,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="../icons/icon-192.svg">
-    <style>
-        :root {
-            --surface: #1f1f1d;
-            --border: rgba(255,255,255,0.08);
-            --radius: 16px;
-        }
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-primary); }
-        .admin-wrapper { display: flex; min-height: 100vh; }
-        .admin-sidebar {
-            width: 240px; background: var(--bg-color);
-            border-right: 1px solid var(--border);
-            padding: 2rem 0; flex-shrink: 0;
-        }
-        .admin-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px; }
-        .admin-sidebar .logo span { color: var(--accent); }
-        .admin-sidebar nav a {
-            display: flex; align-items: center; gap: 12px;
-            padding: 0.65rem 1.5rem; color: var(--text-secondary);
-            text-decoration: none; font-size: 0.9rem;
-            transition: all 0.2s; border-radius: 8px; margin: 0 0.5rem;
-        }
-        .admin-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.08); }
-        .admin-sidebar nav a.active { color: var(--accent); background: rgba(199,239,0,0.1); font-weight: 500; }
-        .admin-sidebar .nav-label {
-            padding: 1.2rem 1.5rem 0.4rem; font-size: 0.75rem;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: rgba(255,255,255,0.5); font-weight: 600;
-        }
-        .admin-sidebar .nav-group { position: relative; }
-        .admin-sidebar .nav-group::before {
-            content: ''; position: absolute; left: 2.3rem;
-            top: 2.2rem; bottom: 0.8rem;
-            width: 1px; background: var(--border);
-        }
-        .admin-sidebar .nav-group:last-of-type::before { bottom: 50%; }
-        .admin-sidebar nav a.sub {
-            padding-left: 3.2rem; font-size: 0.85rem;
-            position: relative;
-        }
-        .admin-sidebar nav a.sub::before {
-            content: ''; position: absolute; left: -0.9rem; top: 50%;
-            width: 0.7rem; height: 1px; background: var(--border);
-        }
-
-        .admin-main { flex: 1; padding: 2.5rem 3rem; overflow-y: auto; max-height: 100vh; }
-        .admin-main h1 { font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.3rem; }
-        .admin-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
-        }
-        .admin-header .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; letter-spacing: 0.3px; }
-        .admin-header .breadcrumb span { color: var(--accent); }
-
-        .section-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            padding: 1.6rem 2rem;
-            margin-bottom: 2rem;
-        }
-        .section-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .table-wrap {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-        table.admin-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        table.admin-table th {
-            text-align: left;
-            padding: 1rem 1.2rem;
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border);
-        }
-        table.admin-table td {
-            padding: 0.85rem 1.2rem;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        table.admin-table tr:last-child td { border-bottom: none; }
-        table.admin-table tr:hover td { background: rgba(255,255,255,0.02); }
-        table.admin-table .badge-role {
-            font-size: 0.65rem; padding: 0.2rem 0.55rem; border-radius: 4px;
-            font-weight: 600; letter-spacing: 0.3px;
-        }
-        table.admin-table .badge-role.admin { background: rgba(199,239,0,0.12); color: var(--accent); }
-        table.admin-table .badge-role.user { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
-        table.admin-table .badge-code {
-            font-family: monospace;
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-        }
-        table.admin-table .badge-used { color: #ff6b6b; font-size: 0.75rem; }
-        table.admin-table .badge-available { color: var(--accent); font-size: 0.75rem; }
-
-        .small-btn {
-            padding: 0.3rem 0.8rem;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: all 0.2s;
-        }
-        .small-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .small-btn.danger:hover { border-color: #ff6b6b; color: #ff6b6b; }
-
-        .gen-row {
-            display: flex; gap: 0.8rem; align-items: end;
-            flex-wrap: wrap;
-        }
-        .gen-row .field { display: flex; flex-direction: column; gap: 0.3rem; }
-        .gen-row .field label { font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.3px; }
-        .gen-row input {
-            background: rgba(255,255,255,0.05);
-            border: none; border-bottom: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 0.5rem 0.5rem;
-            font-size: 0.85rem;
-            outline: none; font-family: 'Inter', sans-serif;
-        }
-        .gen-row input:focus { border-bottom-color: var(--accent); }
-        .gen-row .btn-gen {
-            background: var(--accent); color: var(--bg-color);
-            border: none; padding: 0.5rem 1.4rem;
-            border-radius: 8px; font-weight: 600; font-size: 0.85rem;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .gen-row .btn-gen:hover { opacity: 0.85; transform: translateY(-1px); }
-
-        .msg {
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
-        .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
-        .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
-
-        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-        .user-dropdown .avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: var(--accent); color: var(--bg-color);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.95rem;
-        }
-        .user-dropdown .name { font-size: 0.9rem; font-weight: 600; }
-        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; margin-left: 0.3rem; }
-        .user-dropdown.open .arrow { transform: rotate(180deg); }
-        .user-dropdown-menu {
-            position: absolute; top: calc(100% + 8px); right: 0;
-            background: var(--surface); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; padding: 0.5rem;
-            min-width: 200px; display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 200;
-        }
-        .user-dropdown.open .user-dropdown-menu { display: block; }
-        .user-dropdown-menu a {
-            display: flex; align-items: center; gap: 0.7rem;
-            padding: 0.6rem 0.8rem; color: var(--text-secondary);
-            text-decoration: none; font-size: 0.85rem;
-            border-radius: 8px; transition: all 0.15s;
-        }
-        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
-        .user-dropdown-menu .divider {
-            height: 1px; background: var(--border); margin: 0.3rem 0.5rem;
-        }
-        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
-        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
-
-        .mobile-menu-btn {
-            display: none; align-items: center; justify-content: center;
-            width: 40px; height: 40px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 10px;
-            cursor: pointer; color: var(--text-primary); font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        @media (max-width: 1100px) {
-            .admin-grid { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 768px) {
-            .mobile-menu-btn { display: flex; }
-            .admin-sidebar {
-                position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
-                transform: translateX(-100%); transition: transform 0.3s ease;
-                width: 260px;
-            }
-            .admin-sidebar.open { transform: translateX(0); }
-            .admin-wrapper::before {
-                content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-                z-index: 99; display: none;
-            }
-            .admin-wrapper.overlay::before { display: block; }
-            .admin-main { padding: 1.5rem; }
-            .admin-grid { grid-template-columns: 1fr; }
-            .table-wrap { overflow-x: auto; }
-            table { min-width: 700px; }
-        }
-        @media (max-width: 480px) {
-            .a-header h1 { font-size: 1.4rem; }
-        }
-    </style>
+    
 </head>
 <body>
-<div class="admin-wrapper">
-    <aside class="admin-sidebar">
+<div class="app-wrapper">
+    <aside class="app-sidebar">
         <div class="logo">Mali<span>.</span></div>
         <nav>
             <div class="nav-label">General</div>
@@ -264,8 +46,8 @@
         <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
-    <main class="admin-main">
-        <div class="admin-header">
+    <main class="app-main">
+        <div class="app-header">
             <div>
                 <div class="breadcrumb">⚙️ <span>Administración</span></div>
                 <button class="mobile-menu-btn" id="menuBtn">☰</button>
@@ -289,7 +71,7 @@
         <div class="section-card" id="usuarios">
             <div class="section-title">👥 Usuarios registrados</div>
             <div class="table-wrap">
-                <table class="admin-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -318,7 +100,7 @@
             </div>
 
             <div class="table-wrap">
-                <table class="admin-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Código</th>
@@ -337,154 +119,7 @@
     </main>
 </div>
 
-<script type="module">
-    import { requireAuth, getUserProfile, supabase, logout } from '../script/auth.js'
-
-    const session = await requireAuth()
-    if (!session) throw new Error()
-
-    const profile = await getUserProfile()
-    if (!profile || profile.role !== 'admin') {
-        window.location.href = 'dashboard.html'
-        throw new Error()
-    }
-
-    document.getElementById('userName').textContent = profile.name
-    document.getElementById('userAvatar').textContent = profile.name.charAt(0).toUpperCase()
-
-    const dd = document.getElementById('userDropdown')
-    dd.addEventListener('click', (e) => {
-        if (e.target.closest('.user-dropdown-menu')) return
-        dd.classList.toggle('open')
-    })
-    document.addEventListener('click', (e) => {
-        if (!dd.contains(e.target)) dd.classList.remove('open')
-    })
-
-    const msg = document.getElementById('adminMsg')
-    function showMsg(text, type) {
-        msg.textContent = text
-        msg.className = `msg ${type}`
-        setTimeout(() => { msg.className = 'msg' }, 4000)
-    }
-
-    async function cargarUsuarios() {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .order('created_at', { ascending: false })
-
-        if (error) { showMsg('Error al cargar usuarios: ' + error.message, 'error'); return }
-
-        const tbody = document.getElementById('usersBody')
-        if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay usuarios registrados.</td></tr>'
-            return
-        }
-
-        tbody.innerHTML = data.map(u => {
-            const fecha = new Date(u.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
-            return `<tr>
-                <td>${u.name}</td>
-                <td style="color:var(--text-secondary);font-size:0.8rem;">${u.email || '-'}</td>
-                <td><span class="badge-role ${u.role}">${u.role}</span></td>
-                <td style="color:var(--text-secondary);font-size:0.8rem;">${fecha}</td>
-                <td>
-                    ${u.role === 'admin'
-                        ? (profile.id !== u.id ? '<button class="small-btn" onclick="cambiarRol(\'' + u.id + '\',\'user\')">Hacer user</button>' : '<span style="font-size:0.7rem;color:var(--text-secondary);">(vos)</span>')
-                        : '<button class="small-btn" onclick="cambiarRol(\'' + u.id + '\',\'admin\')">Hacer admin</button>'
-                    }
-                </td>
-            </tr>`
-        }).join('')
-    }
-
-    window.cambiarRol = async function(userId, nuevoRol) {
-        try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({ role: nuevoRol })
-                .eq('id', userId)
-
-            if (error) throw error
-            showMsg(`Rol actualizado a ${nuevoRol}.`, 'success')
-            await cargarUsuarios()
-        } catch (e) {
-            showMsg('Error al cambiar rol: ' + e.message, 'error')
-        }
-    }
-
-    async function cargarCodigos() {
-        const { data, error } = await supabase
-            .from('activation_codes')
-            .select('*, profiles!activation_codes_used_by_fkey(name)')
-            .order('created_at', { ascending: false })
-
-        if (error) { showMsg('Error al cargar códigos: ' + error.message, 'error'); return }
-
-        const tbody = document.getElementById('codesBody')
-        if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay códigos generados.</td></tr>'
-            return
-        }
-
-        tbody.innerHTML = data.map(c => {
-            const fecha = new Date(c.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
-            const usado = c.used
-            const usadoPor = usado && c.profiles ? c.profiles.name : (usado ? '(desconocido)' : '-')
-            return `<tr>
-                <td><span class="badge-code">${c.code}</span></td>
-                <td>${usado ? '<span class="badge-used">● Usado</span>' : '<span class="badge-available">● Disponible</span>'}</td>
-                <td style="color:var(--text-secondary);font-size:0.8rem;">${usadoPor}</td>
-                <td style="color:var(--text-secondary);font-size:0.8rem;">${fecha}</td>
-                <td><button class="small-btn danger" onclick="eliminarCodigo('${c.id}')">Eliminar</button></td>
-            </tr>`
-        }).join('')
-    }
-
-    window.eliminarCodigo = async function(codeId) {
-        if (!confirm('¿Eliminar este código de activación?')) return
-        try {
-            const { error } = await supabase
-                .from('activation_codes')
-                .delete()
-                .eq('id', codeId)
-            if (error) throw error
-            showMsg('Código eliminado.', 'success')
-            await cargarCodigos()
-        } catch (e) {
-            showMsg('Error al eliminar: ' + e.message, 'error')
-        }
-    }
-
-    document.getElementById('genBtn').addEventListener('click', async () => {
-        const cantidad = parseInt(document.getElementById('genCantidad').value) || 1
-        const codigos = []
-
-        for (let i = 0; i < cantidad; i++) {
-            const buf = new Uint32Array(1); crypto.getRandomValues(buf); const code = String(100000 + (buf[0] % 900000))
-            codigos.push({ code })
-        }
-
-        try {
-            const { error } = await supabase.from('activation_codes').insert(codigos)
-            if (error) throw error
-            showMsg(`${cantidad} código(s) generado(s).`, 'success')
-            await cargarCodigos()
-        } catch (e) {
-            showMsg('Error al generar: ' + e.message, 'error')
-        }
-    })
-
-    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
-    document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.admin-sidebar')?.classList.toggle('open')
-        document.querySelector('.admin-wrapper')?.classList.toggle('overlay')
-    })
-
-    await cargarUsuarios()
-    await cargarCodigos()
-</script>
+<script type="module" src="../script/admin.js"></script>
 <script src="../script/pwa.js"></script>
 </body>
 </html>

@@ -11,52 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="../icons/icon-192.svg">
-    <style>
-        body { margin: 0; background: var(--bg-color); }
-        .settings-wrapper { max-width: 600px; margin: 0 auto; padding: 3rem 2rem; }
-        .settings-wrapper .back {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;
-            margin-bottom: 2rem; transition: color 0.2s;
-        }
-        .settings-wrapper .back:hover { color: var(--accent); }
-        .settings-wrapper h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .settings-wrapper .sub { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 2rem; }
-        .card-settings {
-            background: #1f1f1d;
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(255,255,255,0.05);
-            margin-bottom: 1.5rem;
-        }
-        .card-settings h3 { font-size: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
-        .card-settings .field { margin-bottom: 1.2rem; }
-        .card-settings .field label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; font-weight: 500; }
-        .card-settings input {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            padding: 0.7rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .card-settings input:focus { border-color: var(--accent); }
-        .msg {
-            padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; display: none;
-        }
-        .msg.error { display: block; background: rgba(255,70,70,0.15); border: 1px solid rgba(255,70,70,0.3); color: #ff6b6b; }
-        .msg.success { display: block; background: rgba(199,239,0,0.15); border: 1px solid rgba(199,239,0,0.3); color: var(--accent); }
-        @media (max-width: 768px) {
-            .settings-wrapper { padding: 2rem 1.5rem; }
-        }
-        @media (max-width: 480px) {
-            .settings-wrapper { padding: 2rem 1.2rem; }
-            .card-settings { padding: 1.5rem; }
-        }
-    </style>
+    
 </head>
 <body>
 <div class="settings-wrapper">
@@ -89,36 +44,7 @@
     </div>
 </div>
 
-<script type="module">
-    import { requireAuth, getUserProfile, updatePassword, updateProfile } from '../script/auth.js'
-
-    const session = await requireAuth()
-    if (!session) throw new Error()
-
-    const profile = await getUserProfile()
-    if (profile) document.getElementById('userName').value = profile.name
-
-    const msg = document.getElementById('ajMsg')
-    function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 4000) }
-
-    document.getElementById('changePwBtn').addEventListener('click', async function () {
-        const current = document.getElementById('currentPw').value
-        const newP = document.getElementById('newPw').value
-        if (!current || !newP) { showMsg('Completá ambos campos.', 'error'); return }
-        if (newP.length < 6) { showMsg('La nueva contraseña debe tener al menos 6 caracteres.', 'error'); return }
-        this.disabled = true; this.textContent = 'Guardando...'
-        try { await updatePassword(current, newP); showMsg('Contraseña actualizada.', 'success'); this.disabled = false; this.textContent = 'Actualizar contraseña'; document.getElementById('currentPw').value = ''; document.getElementById('newPw').value = '' }
-        catch (e) { showMsg(e.message, 'error'); this.disabled = false; this.textContent = 'Actualizar contraseña' }
-    })
-
-    document.getElementById('updateNameBtn').addEventListener('click', async function () {
-        const name = document.getElementById('userName').value.trim()
-        if (!name) { showMsg('El nombre no puede estar vacío.', 'error'); return }
-        this.disabled = true; this.textContent = 'Guardando...'
-        try { await updateProfile({ name }); showMsg('Nombre actualizado.', 'success'); this.disabled = false; this.textContent = 'Guardar cambios' }
-        catch (e) { showMsg(e.message, 'error'); this.disabled = false; this.textContent = 'Guardar cambios' }
-    })
-</script>
+<script type="module" src="../script/ajustes-cuenta.js"></script>
     <div class="footer-brand">⚡ CoreTech System</div>
 <script src="../script/pwa.js"></script>
 </body>

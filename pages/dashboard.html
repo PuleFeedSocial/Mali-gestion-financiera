@@ -11,160 +11,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="../icons/icon-192.svg">
-    <style>
-        :root {
-            --surface: #1f1f1d;
-            --border: rgba(255,255,255,0.08);
-            --radius: 16px;
-        }
-        .dash-wrapper { display: flex; min-height: 100vh; }
-        .dash-sidebar {
-            width: 240px; background: var(--bg-color);
-            border-right: 1px solid var(--border);
-            padding: 2rem 0; flex-shrink: 0;
-        }
-        .dash-sidebar .logo {
-            padding: 0 1.5rem; margin-bottom: 2rem;
-            font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px;
-        }
-        .dash-sidebar .logo span { color: var(--accent); }
-        .dash-sidebar nav a {
-            display: flex; align-items: center; gap: 12px;
-            padding: 0.65rem 1.5rem; color: var(--text-secondary);
-            text-decoration: none; font-size: 0.9rem;
-            transition: all 0.2s; border-radius: 8px; margin: 0 0.5rem;
-        }
-        .dash-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.08); }
-        .dash-sidebar nav a.active {
-            color: var(--accent); background: rgba(199,239,0,0.1);
-            font-weight: 500;
-        }
-        .dash-sidebar .nav-label {
-            padding: 1.2rem 1.5rem 0.4rem; font-size: 0.75rem;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: rgba(255,255,255,0.5); font-weight: 600;
-        }
-        .dash-sidebar .nav-group { position: relative; }
-        .dash-sidebar .nav-group::before {
-            content: ''; position: absolute; left: 2.3rem;
-            top: 2.2rem; bottom: 0.8rem;
-            width: 1px; background: var(--border);
-        }
-        .dash-sidebar .nav-group:last-of-type::before { bottom: 50%; }
-        .dash-sidebar nav a.sub {
-            padding-left: 3.2rem; font-size: 0.85rem;
-            position: relative;
-        }
-        .dash-sidebar nav a.sub::before {
-            content: ''; position: absolute; left: -0.9rem; top: 50%;
-            width: 0.7rem; height: 1px; background: var(--border);
-        }
-        .dash-main { flex: 1; padding: 2.5rem 3rem; overflow-y: auto; max-height: 100vh; }
-        .dash-main h1 { font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 0.5rem; }
-        .dash-main .subtitle { color: var(--text-secondary); margin-bottom: 2.5rem; font-size: 0.95rem; }
-
-        .dash-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
-        }
-        .dash-header .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; letter-spacing: 0.3px; }
-        .dash-header .breadcrumb span { color: var(--accent); }
-        .dash-header .user-area { display: flex; align-items: center; gap: 0.8rem; }
-
-        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-        .user-dropdown .avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: var(--accent); color: var(--bg-color);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 0.95rem;
-        }
-        .user-dropdown .name { font-size: 0.9rem; font-weight: 600; }
-        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; margin-left: 0.3rem; }
-        .user-dropdown.open .arrow { transform: rotate(180deg); }
-        .user-dropdown-menu {
-            position: absolute; top: calc(100% + 8px); right: 0;
-            background: #1f1f1d; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px; padding: 0.5rem;
-            min-width: 200px; display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 200;
-        }
-        .user-dropdown.open .user-dropdown-menu { display: block; }
-        .user-dropdown-menu a {
-            display: flex; align-items: center; gap: 0.7rem;
-            padding: 0.6rem 0.8rem; color: var(--text-secondary);
-            text-decoration: none; font-size: 0.85rem;
-            border-radius: 8px; transition: all 0.15s;
-        }
-        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
-        .user-dropdown-menu .divider {
-            height: 1px; background: rgba(255,255,255,0.08); margin: 0.3rem 0.5rem;
-        }
-        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
-        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
-
-        .welcome-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.2rem;
-        }
-        .welcome-card {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 1.8rem 2rem;
-            border: 1px solid var(--border);
-            transition: transform 0.2s, border-color 0.2s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .welcome-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255,255,255,0.15);
-        }
-        .welcome-card .icon { font-size: 2rem; margin-bottom: 0.8rem; }
-        .welcome-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem; }
-        .welcome-card p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
-        .welcome-card .status {
-            display: inline-block; margin-top: 1rem;
-            font-size: 0.65rem; text-transform: uppercase;
-            letter-spacing: 1px; font-weight: 600;
-        }
-        .welcome-card .status.active { color: var(--accent); }
-        .welcome-card .status.inactive { color: rgba(255,255,255,0.25); }
-
-        .mobile-menu-btn {
-            display: none; align-items: center; justify-content: center;
-            width: 40px; height: 40px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 10px;
-            cursor: pointer; color: var(--text-primary); font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        @media (max-width: 768px) {
-            .mobile-menu-btn { display: flex; }
-            .dash-sidebar {
-                position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
-                transform: translateX(-100%); transition: transform 0.3s ease;
-                width: 260px;
-            }
-            .dash-sidebar.open { transform: translateX(0); }
-            .dash-wrapper::before {
-                content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-                z-index: 99; display: none;
-            }
-            .dash-wrapper.overlay::before { display: block; }
-            .dash-main { padding: 1.5rem; }
-            .welcome-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 480px) {
-            .dash-header h1 { font-size: 1.4rem; }
-        }
-    </style>
+    
 </head>
 <body>
-<div class="dash-wrapper">
-    <aside class="dash-sidebar">
+<div class="app-wrapper">
+    <aside class="app-sidebar">
         <div class="logo">Mali<span>.</span></div>
         <nav>
             <div class="nav-label">General</div>
@@ -197,8 +48,8 @@
         <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
-    <main class="dash-main">
-        <div class="dash-header">
+    <main class="app-main">
+        <div class="app-header">
             <div>
                 <div class="breadcrumb">📊 <span>Panel principal</span></div>
                 <button class="mobile-menu-btn" id="menuBtn">☰</button>
@@ -221,7 +72,7 @@
 
         <p class="subtitle">Todo lo que necesitás para gestionar tus finanzas, tiempo y proyectos en un solo lugar.</p>
 
-        <div class="dash-section-label" style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;letter-spacing:0.5px;margin-bottom:1rem;">MÓDULOS DISPONIBLES</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;letter-spacing:0.5px;margin-bottom:0.8rem;text-transform:uppercase;">Módulos disponibles</div>
 
         <div class="welcome-grid">
             <a href="finanzas-personales.html" class="welcome-card">
@@ -252,42 +103,7 @@
     </main>
 </div>
 
-<script type="module">
-    import { requireAuth, getUserProfile, logout } from '../script/auth.js'
-
-    const session = await requireAuth()
-    if (!session) throw new Error()
-
-    const profile = await getUserProfile()
-    const currency = profile?.currency || 'ARS'
-    if (profile) {
-        if (!profile.setup_complete) { window.location.href = 'setup.html'; throw new Error() }
-        document.getElementById('userName').textContent = profile.name
-        document.getElementById('userAvatar').textContent = profile.name.charAt(0).toUpperCase()
-        if (profile.role === 'admin') {
-            document.getElementById('adminLabel').style.display = 'block'
-            document.getElementById('adminGroup').style.display = 'block'
-        }
-    }
-
-    const dd = document.getElementById('userDropdown')
-    dd.addEventListener('click', (e) => {
-        if (e.target.closest('.user-dropdown-menu')) return
-        dd.classList.toggle('open')
-    })
-    document.addEventListener('click', (e) => {
-        if (!dd.contains(e.target)) dd.classList.remove('open')
-    })
-
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault(); logout()
-    })
-
-    document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.dash-sidebar')?.classList.toggle('open')
-        document.querySelector('.dash-wrapper')?.classList.toggle('overlay')
-    })
-</script>
+<script type="module" src="../script/dashboard.js"></script>
 <button class="pwa-install-btn" id="pwa-install-btn">📲 Instalar Mali</button>
 <script src="../script/pwa.js"></script>
 </body>

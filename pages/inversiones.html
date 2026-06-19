@@ -11,185 +11,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="../icons/icon-192.svg">
-    <style>
-        :root {
-            --surface: #1f1f1d;
-            --border: rgba(255,255,255,0.08);
-            --radius: 16px;
-            --radius-sm: 10px;
-        }
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-primary); }
-        .i-wrapper { display: flex; min-height: 100vh; }
-        .i-sidebar {
-            width: 240px; background: var(--bg-color);
-            border-right: 1px solid var(--border);
-            padding: 2rem 0; flex-shrink: 0;
-        }
-        .i-sidebar .logo { padding: 0 1.5rem; margin-bottom: 2rem; font-size: 1.4rem; font-weight: 800; letter-spacing: -1.5px; }
-        .i-sidebar .logo span { color: var(--accent); }
-        .i-sidebar nav a { display: flex; align-items: center; gap: 12px; padding: 0.65rem 1.5rem; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; transition: all 0.2s; border-radius: 8px; margin: 0 0.5rem; }
-        .i-sidebar nav a:hover { color: var(--accent); background: rgba(199,239,0,0.08); }
-        .i-sidebar nav a.active { color: var(--accent); background: rgba(199,239,0,0.1); font-weight: 500; }
-        .i-sidebar .nav-label { padding: 1.2rem 1.5rem 0.4rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); font-weight: 600; }
-        .i-sidebar .nav-group { position: relative; }
-        .i-sidebar .nav-group::before { content: ''; position: absolute; left: 2.3rem; top: 2.2rem; bottom: 0.8rem; width: 1px; background: var(--border); }
-        .i-sidebar .nav-group:last-of-type::before { bottom: 50%; }
-        .i-sidebar nav a.sub { padding-left: 3.2rem; font-size: 0.85rem; position: relative; }
-        .i-sidebar nav a.sub::before { content: ''; position: absolute; left: -0.9rem; top: 50%; width: 0.7rem; height: 1px; background: var(--border); }
-
-        .i-main { flex: 1; padding: 2.5rem 3rem; overflow-y: auto; max-height: 100vh; }
-        .i-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
-        }
-        .i-header .breadcrumb { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; letter-spacing: 0.3px; }
-        .i-header .breadcrumb span { color: var(--accent); }
-        .i-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -1px; margin: 0; }
-
-        .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-        .user-dropdown .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--bg-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; }
-        .user-dropdown .name { font-size: 0.9rem; font-weight: 600; }
-        .user-dropdown .arrow { font-size: 0.6rem; color: var(--text-secondary); transition: transform 0.2s; margin-left: 0.3rem; }
-        .user-dropdown.open .arrow { transform: rotate(180deg); }
-        .user-dropdown-menu { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.5rem; min-width: 200px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 200; }
-        .user-dropdown.open .user-dropdown-menu { display: block; }
-        .user-dropdown-menu a { display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0.8rem; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: all 0.15s; }
-        .user-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
-        .user-dropdown-menu .divider { height: 1px; background: var(--border); margin: 0.3rem 0.5rem; }
-        .user-dropdown-menu .logout-btn { color: #ff6b6b; }
-        .user-dropdown-menu .logout-btn:hover { background: rgba(255,107,107,0.1); color: #ff6b6b; }
-
-        .resumen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1.2rem; }
-        .resumen-card {
-            background: var(--surface); border-radius: var(--radius);
-            border: 1px solid var(--border); padding: 1.4rem 1.6rem;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-        .resumen-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
-        .resumen-card .label { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.4rem; font-weight: 500; letter-spacing: 0.3px; }
-        .resumen-card .amount { font-size: 2rem; font-weight: 700; letter-spacing: -1px; }
-        .resumen-card .amount.accent { color: var(--accent); }
-
-        .section-card {
-            background: var(--surface); border-radius: var(--radius);
-            border: 1px solid var(--border); padding: 1.6rem 2rem;
-            margin-bottom: 2rem;
-        }
-        .section-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
-
-        .form-inv {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto;
-            gap: 0.8rem; align-items: end;
-        }
-        .form-inv .field { display: flex; flex-direction: column; gap: 0.3rem; }
-        .form-inv .field label { font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.3px; }
-        .form-inv select, .form-inv input {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 8px; padding: 0.6rem 0.7rem;
-            color: var(--text-primary); font-size: 0.85rem; font-family: 'Inter', sans-serif;
-            outline: none; transition: border-color 0.2s, background 0.2s;
-        }
-        .form-inv select:focus, .form-inv input:focus {
-            border-color: var(--accent); background: rgba(255,255,255,0.05);
-        }
-        .form-inv select option { background: var(--surface); color: white; }
-        .form-inv .btn-add {
-            background: var(--accent); color: var(--bg-color);
-            border: none; padding: 0.6rem 1.5rem;
-            border-radius: 8px; font-weight: 600; font-size: 0.85rem;
-            cursor: pointer; transition: all 0.2s; white-space: nowrap;
-        }
-        .form-inv .btn-add:hover { opacity: 0.85; transform: translateY(-1px); }
-
-        .table-wrap {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius);
-        }
-        .table-wrap .scroll-area { overflow-x: auto; overflow-y: hidden; }
-        .table-wrap::-webkit-scrollbar { height: 4px; }
-        .table-wrap::-webkit-scrollbar-track { background: transparent; }
-        .table-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-        table.i-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        table.i-table th { text-align: left; padding: 1rem 1.2rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
-        table.i-table td { padding: 0.85rem 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
-        table.i-table tr:last-child td { border-bottom: none; }
-        table.i-table tr:hover td { background: rgba(255,255,255,0.02); }
-        table.i-table .monto { font-weight: 600; }
-        table.i-table .monto.gain { color: var(--accent); }
-        table.i-table .monto.neutral { color: var(--text-primary); }
-
-        .tag-pill {
-            font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 20px;
-            font-weight: 600; letter-spacing: 0.3px;
-            border: 1px solid rgba(255,255,255,0.06); display: inline-block;
-        }
-        .tag-pill.plazo_fijo { background: rgba(100,200,255,0.1); color: #64c8ff; }
-        .tag-pill.fondos { background: rgba(180,130,255,0.1); color: #b482ff; }
-        .tag-pill.cripto { background: rgba(255,165,0,0.1); color: #ffa500; }
-        .tag-pill.acciones { background: rgba(74,222,128,0.1); color: #4ade80; }
-        .tag-pill.bonos { background: rgba(199,239,0,0.1); color: var(--accent); }
-        .tag-pill.otros { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
-
-        .action-group { display: flex; align-items: center; gap: 0.3rem; }
-        .action-btn {
-            background: none; border: none; cursor: pointer;
-            padding: 0.3rem; border-radius: 6px;
-            transition: all 0.2s; display: flex; line-height: 0;
-        }
-        .action-btn svg { width: 16px; height: 16px; stroke: rgba(255,255,255,0.25); transition: stroke 0.15s; }
-        .action-btn.claim-btn {
-            padding: 0.25rem 0.6rem; font-size: 0.7rem; font-weight: 500;
-            color: var(--text-secondary); border: 1px solid var(--border);
-            border-radius: 6px; font-family: 'Inter', sans-serif;
-            transition: all 0.2s; white-space: nowrap;
-        }
-        .action-btn.claim-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .action-btn.liquidate:hover svg { stroke: #fbbf24; }
-        .action-btn.liquidate:hover { background: rgba(251,191,36,0.08); }
-        .action-btn.delete-inv:hover svg { stroke: #f87171; }
-        .action-btn.delete-inv:hover { background: rgba(248,113,113,0.08); }
-
-        .msg { padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
-        .msg.error { display: block; background: rgba(255,70,70,0.12); border: 1px solid rgba(255,70,70,0.2); color: #ff6b6b; }
-        .msg.success { display: block; background: rgba(199,239,0,0.1); border: 1px solid rgba(199,239,0,0.15); color: var(--accent); }
-
-        .mobile-menu-btn {
-            display: none; align-items: center; justify-content: center;
-            width: 40px; height: 40px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 10px;
-            cursor: pointer; color: var(--text-primary); font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        @media (max-width: 1100px) {
-            .form-inv { grid-template-columns: 1fr 1fr; }
-            .resumen-grid { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 768px) {
-            .mobile-menu-btn { display: flex; }
-            .i-sidebar {
-                position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
-                transform: translateX(-100%); transition: transform 0.3s ease;
-                width: 260px;
-            }
-            .i-sidebar.open { transform: translateX(0); }
-            .i-wrapper::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
-            .i-wrapper.overlay::before { display: block; }
-            .i-main { padding: 1.5rem; max-height: none; }
-            .resumen-grid { grid-template-columns: 1fr; }
-            .form-inv { grid-template-columns: 1fr; }
-            table.i-table { min-width: 700px; }
-        }
-        @media (max-width: 480px) {
-            .i-header h1 { font-size: 1.4rem; }
-            .resumen-card .amount { font-size: 1.5rem; }
-        }
-    </style>
+    
 </head>
 <body>
-<div class="i-wrapper">
-    <aside class="i-sidebar">
+<div class="app-wrapper">
+    <aside class="app-sidebar">
         <div class="logo">Mali<span>.</span></div>
         <nav>
             <div class="nav-label">General</div>
@@ -218,8 +44,8 @@
         <div class="sidebar-footer">⚡ CoreTech System</div>
     </aside>
 
-    <main class="i-main">
-        <div class="i-header">
+    <main class="app-main">
+        <div class="app-header">
             <div>
                 <div class="breadcrumb">📈 Finanzas / <span>Inversiones</span></div>
                 <button class="mobile-menu-btn" id="menuBtn">☰</button>
@@ -257,7 +83,7 @@
 
         <div class="section-card">
             <div class="section-title">➕ Nueva inversión</div>
-            <div class="form-inv">
+            <div class="form-inv form-grid">
                 <div class="field">
                     <label>Nombre del activo</label>
                     <input type="text" id="fName" placeholder="Ej: Plazo Fijo, S&P 500">
@@ -301,7 +127,7 @@
             </div>
             <div class="table-wrap">
                 <div class="scroll-area">
-                    <table class="i-table">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Activo</th>
@@ -323,164 +149,7 @@
     </main>
 </div>
 
-<script type="module">
-    import { requireAuth, getUserProfile, logout, formatCurrency } from '../script/auth.js'
-    import { getInvestments, addInvestment, liquidateInvestment, claimInterest, deleteInvestment } from '../script/inversiones.js'
-
-    const session = await requireAuth()
-    if (!session) throw new Error()
-
-    const profile = await getUserProfile()
-    const currency = profile?.currency || 'ARS'
-    document.getElementById('userName').textContent = profile?.name || 'Usuario'
-    document.getElementById('userAvatar').textContent = (profile?.name || 'U').charAt(0).toUpperCase()
-    if (profile?.role === 'admin') {
-        document.getElementById('adminLabel').style.display = 'block'
-        document.getElementById('adminGroup').style.display = 'block'
-    }
-
-    const dd = document.getElementById('userDropdown')
-    dd.addEventListener('click', (e) => { if (!e.target.closest('.user-dropdown-menu')) dd.classList.toggle('open') })
-    document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
-    document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
-
-    document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.i-sidebar')?.classList.toggle('open')
-        document.querySelector('.i-wrapper')?.classList.toggle('overlay')
-    })
-
-    const msg = document.getElementById('iMsg')
-    function showMsg(text, type) { msg.textContent = text; msg.className = `msg ${type}`; setTimeout(() => { msg.className = 'msg' }, 3500) }
-
-    const hoy = new Date()
-    document.getElementById('fFecha').value = new Date(hoy.getFullYear() + 1, hoy.getMonth(), hoy.getDate()).toISOString().split('T')[0]
-    document.getElementById('fStartDate').value = hoy.toISOString().split('T')[0]
-
-    const typeLabels = {
-        plazo_fijo: 'Plazo Fijo', fondos: 'Fondos', cripto: 'Cripto',
-        acciones: 'Acciones', bonos: 'Bonos', otros: 'Otros'
-    }
-
-    async function cargarInversiones() {
-        try {
-            const todas = await getInvestments()
-            const activas = todas.filter(i => i.status === 'activo')
-
-            const capitalTotal = activas.reduce((s, i) => s + Number(i.capital), 0)
-            document.getElementById('capitalInvertido').textContent = formatCurrency(capitalTotal, currency)
-            document.getElementById('activosCount').textContent = activas.length
-
-            const rendimiento = activas.reduce((s, i) => s + (Number(i.capital) * Number(i.interest_rate) / 100), 0)
-            document.getElementById('rendimiento').textContent = formatCurrency(rendimiento, currency)
-
-            const filtro = document.getElementById('filtroEstado').value
-            const filtradas = filtro ? todas.filter(i => i.status === filtro) : todas
-            renderTabla(filtradas)
-        } catch (e) { showMsg('Error al cargar inversiones.', 'error') }
-    }
-
-    function renderTabla(inversiones) {
-        const tbody = document.getElementById('invBody')
-        if (!inversiones.length) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:2rem;">No hay inversiones registradas.</td></tr>'
-            return
-        }
-        tbody.innerHTML = inversiones.map(i => {
-            const capital = Number(i.capital)
-            const tasa = Number(i.interest_rate)
-            const interes = Number(i.accumulated_interest) || 0
-            const endDate = i.end_date ? new Date(i.end_date + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'
-
-            let acciones = '<div class="action-group">'
-            if (i.status === 'activo') {
-                if (interes > 0) {
-                    acciones += `<button class="action-btn claim-btn" onclick="cobrarInteres(${i.id})">Cobrar</button>`
-                }
-                acciones += `<button class="action-btn liquidate" onclick="liquidar(${i.id})" title="Liquidar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 1a11 11 0 1 0 0 22 11 11 1 0 0 0 0-22z"/>
-                        <polyline points="7 13 10 16 17 9"/>
-                        <line x1="12" y1="16" x2="12" y2="9"/>
-                    </svg>
-                </button>`
-            }
-            acciones += `<button class="action-btn delete-inv" onclick="eliminarInv(${i.id})" title="Eliminar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    <line x1="10" y1="11" x2="10" y2="17"/>
-                    <line x1="14" y1="11" x2="14" y2="17"/>
-                </svg>
-            </button>`
-            acciones += '</div>'
-
-            return `<tr>
-                <td style="font-weight:500;">${i.name}</td>
-                <td><span class="tag-pill ${i.type}">${typeLabels[i.type] || i.type}</span></td>
-                <td class="monto neutral">${formatCurrency(capital, currency)}</td>
-                <td style="color:var(--accent);font-weight:500;">${tasa}%</td>
-                <td class="monto ${interes > 0 ? 'gain' : 'neutral'}">${formatCurrency(interes, currency)}</td>
-                <td style="color:var(--text-secondary);font-size:0.8rem;">${endDate}</td>
-                <td>${acciones}</td>
-            </tr>`
-        }).join('')
-    }
-
-    window.cobrarInteres = async function(id) {
-        try {
-            await claimInterest(id)
-            showMsg('Interés cobrado y registrado en movimientos.', 'success')
-            await cargarInversiones()
-        } catch (e) { showMsg('Error: ' + e.message, 'error') }
-    }
-
-    window.liquidar = async function(id) {
-        if (!confirm('¿Liquidar esta inversión?')) return
-        try {
-            await liquidateInvestment(id)
-            showMsg('Inversión liquidada.', 'success')
-            await cargarInversiones()
-        } catch (e) { showMsg('Error: ' + e.message, 'error') }
-    }
-
-    window.eliminarInv = async function(id) {
-        if (!confirm('¿Eliminar esta inversión permanentemente?')) return
-        try {
-            await deleteInvestment(id)
-            showMsg('Inversión eliminada.', 'success')
-            await cargarInversiones()
-        } catch (e) { showMsg('Error: ' + e.message, 'error') }
-    }
-
-    document.getElementById('addBtn').addEventListener('click', async () => {
-        const name = document.getElementById('fName').value.trim()
-        const type = document.getElementById('fType').value
-        const capital = parseFloat(document.getElementById('fCapital').value)
-        const tasa = parseFloat(document.getElementById('fTasa').value)
-        const endDate = document.getElementById('fFecha').value
-        const startDate = document.getElementById('fStartDate').value
-
-        if (!name) { showMsg('Ingresá el nombre del activo.', 'error'); return }
-        if (!capital || capital <= 0) { showMsg('Ingresá un capital válido.', 'error'); return }
-        if (isNaN(tasa) || tasa < 0) { showMsg('Ingresá una tasa válida.', 'error'); return }
-        if (!endDate) { showMsg('Seleccioná una fecha de vencimiento.', 'error'); return }
-
-        try {
-            await addInvestment({ name, type, capital, interestRate: tasa, startDate, endDate })
-            showMsg('Inversión registrada.', 'success')
-            document.getElementById('fName').value = ''
-            document.getElementById('fCapital').value = ''
-            document.getElementById('fTasa').value = ''
-            const nextYear = new Date(hoy.getFullYear() + 1, hoy.getMonth(), hoy.getDate())
-            document.getElementById('fFecha').value = nextYear.toISOString().split('T')[0]
-            await cargarInversiones()
-        } catch (e) { showMsg('Error: ' + e.message, 'error') }
-    })
-
-    document.getElementById('filtroEstado').addEventListener('change', cargarInversiones)
-
-    await cargarInversiones()
-</script>
+<script type="module" src="../script/inversiones-page.js"></script>
 <script src="../script/pwa.js"></script>
 </body>
 </html>
