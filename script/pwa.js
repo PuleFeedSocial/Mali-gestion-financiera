@@ -78,6 +78,7 @@
   // Overlay click → close sidebar
   document.addEventListener('click', (e) => {
     if (!e.target.closest) return
+    if (e.target.closest('.mobile-menu-btn')) return
     const overlay = e.target.closest('.app-wrapper.overlay')
     if (overlay) {
       const sidebar = overlay.querySelector('.app-sidebar')
