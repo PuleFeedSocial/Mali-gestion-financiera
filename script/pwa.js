@@ -78,9 +78,9 @@
   // Overlay click → close sidebar
   document.addEventListener('click', (e) => {
     if (!e.target.closest) return
-    const overlay = e.target.closest('.dash-wrapper.overlay, .admin-wrapper.overlay, .fp-wrapper.overlay, .d-wrapper.overlay, .t-wrapper.overlay, .c-wrapper.overlay, .h-wrapper.overlay, .i-wrapper.overlay')
+    const overlay = e.target.closest('.app-wrapper.overlay')
     if (overlay) {
-      const sidebar = overlay.querySelector('.dash-sidebar, .admin-sidebar, .fp-sidebar, .d-sidebar, .t-sidebar, .c-sidebar, .h-sidebar, .i-sidebar')
+      const sidebar = overlay.querySelector('.app-sidebar')
       if (sidebar && !sidebar.contains(e.target)) {
         sidebar.classList.remove('open')
         overlay.classList.remove('overlay')
@@ -94,9 +94,9 @@
   document.addEventListener('touchend', (e) => {
     const dx = e.changedTouches[0].screenX - touchStartX
     if (dx > 80) {
-      document.querySelectorAll('.dash-sidebar.open, .admin-sidebar.open, .fp-sidebar.open, .d-sidebar.open, .t-sidebar.open, .c-sidebar.open, .h-sidebar.open, .i-sidebar.open').forEach((el) => {
+      document.querySelectorAll('.app-sidebar.open').forEach((el) => {
         el.classList.remove('open')
-        el.closest('.dash-wrapper, .admin-wrapper, .fp-wrapper, .d-wrapper, .t-wrapper, .c-wrapper, .h-wrapper, .i-wrapper')?.classList.remove('overlay')
+        el.closest('.app-wrapper')?.classList.remove('overlay')
       })
     }
   }, { passive: true })

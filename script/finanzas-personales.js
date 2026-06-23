@@ -155,13 +155,13 @@
     }
 
     document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.fp-sidebar')?.classList.toggle('open')
-        document.querySelector('.fp-wrapper')?.classList.toggle('overlay')
+        document.querySelector('.app-sidebar')?.classList.toggle('open')
+        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
     })
-    document.querySelector('.fp-wrapper')?.addEventListener('click', (e) => {
-        if (e.target === document.querySelector('.fp-wrapper') || (e.target.classList.contains('fp-wrapper') && window.innerWidth <= 768)) {
-            document.querySelector('.fp-sidebar')?.classList.remove('open')
-            document.querySelector('.fp-wrapper')?.classList.remove('overlay')
+    document.querySelector('.app-wrapper')?.addEventListener('click', (e) => {
+        if (e.target === document.querySelector('.app-wrapper') || (e.target.classList.contains('app-wrapper') && window.innerWidth <= 768)) {
+            document.querySelector('.app-sidebar')?.classList.remove('open')
+            document.querySelector('.app-wrapper')?.classList.remove('overlay')
         }
     })
 

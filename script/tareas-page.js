@@ -124,8 +124,8 @@
     document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
     document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.t-sidebar')?.classList.toggle('open')
-        document.querySelector('.t-wrapper')?.classList.toggle('overlay')
+        document.querySelector('.app-sidebar')?.classList.toggle('open')
+        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
     })
 
     await cargarTareas()

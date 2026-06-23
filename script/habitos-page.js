@@ -18,8 +18,8 @@
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
 
     document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.h-sidebar')?.classList.toggle('open')
-        document.querySelector('.h-wrapper')?.classList.toggle('overlay')
+        document.querySelector('.app-sidebar')?.classList.toggle('open')
+        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
     })
 
     const msg = document.getElementById('hMsg')

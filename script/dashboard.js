@@ -29,6 +29,6 @@
     })
 
     document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.dash-sidebar')?.classList.toggle('open')
-        document.querySelector('.dash-wrapper')?.classList.toggle('overlay')
+        document.querySelector('.app-sidebar')?.classList.toggle('open')
+        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
     })
