@@ -33,6 +33,23 @@
         </ul>
         
         <a href="./pages/acceder-formulario.html" class="btn btn-outline desktop-btn">Acceder</a>
+
+        <!-- User area (visible when logged in) -->
+        <div class="nav-user-area" id="navUserArea" style="display:none;">
+            <div class="nav-user-dropdown" id="navUserDropdown">
+                <div class="avatar" id="navUserAvatar">M</div>
+                <span class="name" id="navUserName">Usuario</span>
+                <span class="arrow">▼</span>
+                <div class="user-dropdown-menu">
+                    <a href="./pages/dashboard.html">📊 Dashboard</a>
+                    <div class="divider"></div>
+                    <a href="./pages/ajustes-cuenta.html">⚙️ Ajustes de cuenta</a>
+                    <a href="./pages/preferencias.html">🎨 Preferencias</a>
+                    <div class="divider"></div>
+                    <a href="#" id="navLogoutBtn" class="logout-btn">🚪 Cerrar sesión</a>
+                </div>
+            </div>
+        </div>
     </nav>
 
     <!-- Hero Section -->
@@ -316,5 +333,6 @@
     <script src="script/main.js"></script>
     <button class="pwa-install-btn" id="pwa-install-btn">📲 Instalar Mali</button>
     <script src="script/pwa.js"></script>
+    <script type="module" src="script/index-auth.js"></script>
 </body>
 </html>

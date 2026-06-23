@@ -163,6 +163,20 @@ img { max-width: 100%; display: block; }
    5. Shared: User Dropdown
    ========================================= */
 .user-area { display: flex; align-items: center; gap: 0.8rem; }
+
+/* User area for landing page navbar */
+.nav-user-area { display: flex; align-items: center; }
+.nav-user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.nav-user-dropdown .avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent); color: var(--bg-color);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
+}
+.nav-user-dropdown .name { font-size: 0.82rem; font-weight: 600; }
+.nav-user-dropdown .arrow { font-size: 0.55rem; color: var(--text-secondary); transition: transform 0.2s; }
+.nav-user-dropdown.open .arrow { transform: rotate(180deg); }
+.nav-user-dropdown .user-dropdown-menu { right: 0; top: calc(100% + 10px); }
 .user-dropdown { position: relative; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
 .user-dropdown .avatar {
   width: 36px; height: 36px; border-radius: 50%;
@@ -1285,6 +1299,9 @@ img { max-width: 100%; display: block; }
 
   /* Landing page */
   .navbar { padding: 0.8rem 5%; }
+  .nav-user-dropdown .name,
+  .nav-user-dropdown .arrow { display: none; }
+  .nav-user-dropdown .avatar { width: 30px; height: 30px; font-size: 0.78rem; }
   .desktop-btn { display: none; }
   .mobile-btn-container { display: block; margin-top: 1.5rem; }
   .menu-toggle { display: flex; }
