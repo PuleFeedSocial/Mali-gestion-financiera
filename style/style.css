@@ -1299,7 +1299,7 @@ img { max-width: 100%; display: block; }
 
   /* === App header (sticky top bar) === */
   .app-header {
-    position: sticky; top: 0; z-index: 101;
+    position: sticky; top: 0; z-index: 101; flex-wrap: nowrap;
     background: rgba(45,45,42,0.92);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     margin: 0 -1rem 1rem -1rem; padding: 0.8rem 1rem;
@@ -1312,6 +1312,7 @@ img { max-width: 100%; display: block; }
     transform: translateY(-50%); z-index: 10;
   }
   .app-header > div:first-child {
+    position: relative;
     display: flex; flex-direction: column; align-items: flex-start;
     padding-left: 2.8rem; min-width: 0; max-width: 100%;
   }
