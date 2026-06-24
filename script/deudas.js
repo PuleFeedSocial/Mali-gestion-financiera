@@ -18,10 +18,6 @@
     document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
 
-    document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.app-sidebar')?.classList.toggle('open')
-        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
-    })
 
     const fm = n => Number(n).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     const msg = document.getElementById('dMsg')

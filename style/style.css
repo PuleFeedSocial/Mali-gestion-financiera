@@ -584,6 +584,17 @@ img { max-width: 100%; display: block; }
 .bottom-nav-item.active { color: var(--accent); }
 .bottom-nav-item svg { width: 22px; height: 22px; stroke-width: 2px; }
 
+/* Sidebar overlay (mobile) */
+.sidebar-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.55);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.sidebar-overlay.active {
+  opacity: 1; visibility: visible;
+}
+
 /* =========================================
    16. Toolbar (finanzas filter bar)
    ========================================= */
@@ -1389,7 +1400,7 @@ img { max-width: 100%; display: block; }
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .table-wrap::-webkit-scrollbar { display: none; }
   .table-wrap { -ms-overflow-style: none; scrollbar-width: none; }
-  .data-table { min-width: 650px; }
+  .data-table { min-width: 600px; }
   .data-table th, .data-table td { white-space: nowrap; }
   .data-table td:first-child { max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
 

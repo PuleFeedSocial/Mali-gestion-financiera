@@ -123,9 +123,5 @@
     dd.addEventListener('click', (e) => { if (e.target.closest('.user-dropdown-menu')) return; dd.classList.toggle('open') })
     document.addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open') })
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
-    document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.app-sidebar')?.classList.toggle('open')
-        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
-    })
 
     await cargarTareas()

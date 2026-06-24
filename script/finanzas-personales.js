@@ -154,10 +154,6 @@
         })
     }
 
-    document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.app-sidebar')?.classList.toggle('open')
-        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
-    })
     document.querySelector('.app-wrapper')?.addEventListener('click', (e) => {
         if (e.target === document.querySelector('.app-wrapper') || (e.target.classList.contains('app-wrapper') && window.innerWidth <= 768)) {
             document.querySelector('.app-sidebar')?.classList.remove('open')

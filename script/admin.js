@@ -137,10 +137,6 @@
     })
 
     document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout() })
-    document.getElementById('menuBtn')?.addEventListener('click', () => {
-        document.querySelector('.app-sidebar')?.classList.toggle('open')
-        document.querySelector('.app-wrapper')?.classList.toggle('overlay')
-    })
 
     await cargarUsuarios()
     await cargarCodigos()

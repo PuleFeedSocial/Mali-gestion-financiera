@@ -75,30 +75,35 @@
     }, { once: true })
   }
 
-  // Overlay click → close sidebar
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest) return
-    if (e.target.closest('.mobile-menu-btn')) return
-    const overlay = e.target.closest('.app-wrapper.overlay')
-    if (overlay) {
-      const sidebar = overlay.querySelector('.app-sidebar')
-      if (sidebar && !sidebar.contains(e.target)) {
-        sidebar.classList.remove('open')
-        overlay.classList.remove('overlay')
-      }
-    }
-  })
+  // === Mobile Sidebar Menu ===
+  ;(function () {
+    var btn = document.querySelector('.mobile-menu-btn')
+    var sidebar = document.querySelector('.app-sidebar')
+    if (!btn || !sidebar) return
 
-  // Swipe to close sidebar
-  let touchStartX = 0
-  document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX }, { passive: true })
-  document.addEventListener('touchend', (e) => {
-    const dx = e.changedTouches[0].screenX - touchStartX
-    if (dx > 80) {
-      document.querySelectorAll('.app-sidebar.open').forEach((el) => {
-        el.classList.remove('open')
-        el.closest('.app-wrapper')?.classList.remove('overlay')
-      })
+    var overlay = document.querySelector('.sidebar-overlay')
+    if (!overlay) {
+      overlay = document.createElement('div')
+      overlay.className = 'sidebar-overlay'
+      document.body.appendChild(overlay)
     }
-  }, { passive: true })
+
+    function open () { sidebar.classList.add('open'); overlay.classList.add('active') }
+    function close () { sidebar.classList.remove('open'); overlay.classList.remove('active') }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation()
+      if (sidebar.classList.contains('open')) close()
+      else open()
+    })
+
+    overlay.addEventListener('click', close)
+
+    var touchStartX = 0
+    document.addEventListener('touchstart', function (e) { touchStartX = e.changedTouches[0].screenX }, { passive: true })
+    document.addEventListener('touchend', function (e) {
+      var dx = e.changedTouches[0].screenX - touchStartX
+      if (dx > 80 && !sidebar.classList.contains('open')) open()
+    }, { passive: true })
+  })()
 })()
