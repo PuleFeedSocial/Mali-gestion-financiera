@@ -68,6 +68,7 @@
       if (btn) btn.style.display = 'none'
     })
   }
+  document.getElementById('pwa-install-btn')?.addEventListener('click', window.installPWA)
 
   if (Notification && Notification.permission === 'default') {
     document.addEventListener('click', () => {
