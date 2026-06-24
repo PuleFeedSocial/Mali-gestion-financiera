@@ -1,7 +1,7 @@
 import { getSession, getUserProfile, logout } from './auth.js'
 
 const session = await getSession()
-if (!session?.data?.session) {
+if (!session) {
   document.getElementById('navUserArea').style.display = 'none'
   document.querySelector('.desktop-btn').style.display = ''
   document.querySelector('.mobile-btn-container').style.display = ''
